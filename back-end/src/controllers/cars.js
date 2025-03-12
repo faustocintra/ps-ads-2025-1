@@ -32,7 +32,7 @@ controller.retrieveAll = async function (req, res) {
     // Recupera todos os registros de clientes do banco de dados,
     // ordenados pelo campo "name"
     const result = await prisma.car.findMany({
-      orderBy: [ { name: 'asc' } ]
+      orderBy: [ { model: 'asc' } ]
     })
 
     // HTTP 200: OK (implícito)
