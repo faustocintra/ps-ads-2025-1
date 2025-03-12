@@ -9,7 +9,7 @@ controller.create = async function (req, res) {
     // que queremos armazenar do BD. Então, invocamos o
     // Prisma para fazer a interface com o BD, repassando
     // o req.body
-    await prisma.customer.create({ data: req.body })
+    await prisma.car.create({ data: req.body })
 
     // Se der tudo certo, enviamos como resposta o 
     // código HTTP apropriado, no caso
@@ -29,9 +29,9 @@ controller.create = async function (req, res) {
 controller.retrieveAll = async function (req, res) {
   try {
     // Recupera todos os registros de clientes do banco de dados,
-    // ordenados pelo campo "name"
-    const result = await prisma.customer.findMany({
-      orderBy: [ { name: 'asc' } ]
+    // ordenados pelo campo "model"
+    const result = await prisma.car.findMany({
+      orderBy: [ { model: 'asc' } ]
     })
 
     // HTTP 200: OK (implícito)
@@ -51,7 +51,7 @@ controller.retrieveOne = async function (req, res) {
   try {
     // Busca no banco de dados apenas o cliente indicado
     // pelo parâmetro "id"
-    const result = await prisma.customer.findUnique({
+    const result = await prisma.car.findUnique({
       where: { id: Number(req.params.id) }
     })
 
@@ -75,7 +75,7 @@ controller.update = async function(req, res) {
   try {
     // Busca o registro no banco de dados pelo seu id
     // e atualiza as informações com o conteúdo de req.body
-    await prisma.customer.update({
+    await prisma.car.update({
       where: { id: Number(req.params.id) },
       data: req.body
     })
@@ -95,7 +95,7 @@ controller.update = async function(req, res) {
 
 controller.delete = async function(req, res) {
   try {
-    await prisma.customer.delete({
+    await prisma.car.delete({
       where: { id: Number(req.params.id) }
     })
 
