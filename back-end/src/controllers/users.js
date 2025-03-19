@@ -1,16 +1,22 @@
-
 import prisma from '../database/client.js'
+import bcrypt from 'bcrypt'
 
 const controller = {}   // Objeto vazio
 
 controller.create = async function (req, res) {
   try {
+    // se existe o campo 'password' em req.body,
+    //é necessario gerar o hash da senha antes de armazená-la no BD
+    if (req.body.password) {
+      req.body.password= await bcrypt.hash(req.body.password, 12)
+    }
+
     // Dentro do parâmetro req (requisição), haverá
     // um objeto chamado "body" que contém as informações
     // que queremos armazenar do BD. Então, invocamos o
     // Prisma para fazer a interface com o BD, repassando
     // o req.body
-    await prisma.customer.create({ data: req.body })
+    await prisma.user.create({ data: req.body })
 
     // Se der tudo certo, enviamos como resposta o 
     // código HTTP apropriado, no caso
@@ -31,8 +37,8 @@ controller.retrieveAll = async function (req, res) {
   try {
     // Recupera todos os registros de clientes do banco de dados,
     // ordenados pelo campo "name"
-    const result = await prisma.customer.findMany({
-      orderBy: [ { name: 'asc' } ]
+    const result = await prisma.user.findMany({
+      orderBy: [ { fullname: 'asc' } ]
     })
 
     // HTTP 200: OK (implícito)
@@ -52,7 +58,7 @@ controller.retrieveOne = async function (req, res) {
   try {
     // Busca no banco de dados apenas o cliente indicado
     // pelo parâmetro "id"
-    const result = await prisma.customer.findUnique({
+    const result = await prisma.user.findUnique({
       where: { id: Number(req.params.id) }
     })
 
@@ -74,9 +80,15 @@ controller.retrieveOne = async function (req, res) {
 
 controller.update = async function(req, res) {
   try {
+    // se existe o campo 'password' em req.body,
+    //é necessario gerar o hash da senha antes de armazená-la no BD
+    if (req.body.password) {
+      req.body.password= await bcrypt.hash(req.body.password, 12)
+    }
+    
     // Busca o registro no banco de dados pelo seu id
     // e atualiza as informações com o conteúdo de req.body
-    await prisma.customer.update({
+    await prisma.user.update({
       where: { id: Number(req.params.id) },
       data: req.body
     })
@@ -96,7 +108,7 @@ controller.update = async function(req, res) {
 
 controller.delete = async function(req, res) {
   try {
-    await prisma.customer.delete({
+    await prisma.user.delete({
       where: { id: Number(req.params.id) }
     })
 
