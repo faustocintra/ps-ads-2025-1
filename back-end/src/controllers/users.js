@@ -1,5 +1,6 @@
 import prisma from '../database/client.js'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const controller = {}   // Objeto vazio
 
@@ -38,6 +39,7 @@ controller.create = async function (req, res) {
 controller.retrieveAll = async function (req, res) {
   try {
     const result = await prisma.user.findMany({
+      omit: {password: true},
       orderBy: [
         { fullname: 'asc' }  // ✅ Corrigido aqui!
       ]
@@ -56,6 +58,7 @@ controller.retrieveOne = async function (req, res) {
     // Busca no banco de dados apenas o carroindicado
     // pelo parâmetro "id"
     const result = await prisma.user.findUnique({
+      omit: {password: true},
       where: { id: Number(req.params.id) }
     })
 
@@ -125,5 +128,61 @@ controller.delete = async function(req, res) {
     else res.status(500).end()
   }
 }
+ controller.login = async function (req, res){
+  try {
+    //Busca o usuário no BD usando o valor dos campos
+    //"username" OU "email"
+    const user = await prisma.user.findFirst({
+      where: {
+        OR:[
+          {username: req.body?.username },
+          {email: req.body?.email },
+
+        ]
+      }
+    }
+
+
+    )
+
+// Se o usuário não for encontrado, retorna
+//HTTP 401: Unauthorized
+if(!user) return res.status(401).end()
+
+//Usuario encontrado, vamos conferir a senha
+const passwordIsValid = await bcrypt.compare(req.body?.password, user.password)
+//Se a senha estiver errada , retorna
+//HTTP: 401: Unauthorized
+if (! passwordIsValid) {
+  console.error('ERRO DE LOGIN: senha inválida')
+  return res.status(401).end()
+}
+
+//Deleta o campo "password" do objeto "user" antes de usá-lo.
+//no token e no valor de retorno
+if(user.password) delete user.password
+
+//usuario/email e senha OK, passamos ao procedimento de gerar o token
+const token = jwt.sign(
+  user, 
+  process.env.TOKEN_SECRET,
+  {expiresIn: '24h'}
+)
+//Retorna o token e o usuário autenticado, com o status
+//HTTP 200: OK (implicito)
+res.send({token,user})
+
+  }
+  catch(error) {
+    // Se algo de errado acontecer, cairemos aqui
+    // Nesse caso, vamos exibir o erro no console e enviar
+    // o código HTTP correspondente a erro do servidor
+    // HTTP 500: Internal Server Error
+    console.error(error)
+    res.status(500).end()
+  }
+
+
+ }
 
 export default controller
