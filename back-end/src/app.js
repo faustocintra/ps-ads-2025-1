@@ -28,6 +28,10 @@ app.use('/users', usersRouter)
 
 //------------------- ROTAS ---------------------------
 
+//middleware de verificação de autorização
+import authMiddleware from './middleware/auth.js'
+app.use(authMiddleware)
+
 import customersRouter from './routes/customers.js'
 app.use('/customers', customersRouter)
 
