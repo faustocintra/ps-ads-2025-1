@@ -35,7 +35,7 @@ export default function NovoComponente() {
                 <CardContent>
                     {/* meu nome*/}
                     <Typography gutterBottom variant="h5" component="div">
-                    Rafaela Aparecida Dos Santos
+                    Ana Júlia Andrade Barbosa
                     </Typography>
 
                     {/* Texto sobre mim*/}

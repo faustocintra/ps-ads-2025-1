@@ -44,7 +44,7 @@ model Car {
 
 model User {
   id               Int            @id @default (autoincrement())
-  fullname         String         //nome completo
+  fullname         String         //nosme completo
   username         String         @unique //nao pode se repetir na tabela
   email            String         @unique 
   password         String         

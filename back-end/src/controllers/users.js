@@ -143,33 +143,37 @@ controller.login = async function (req, res) {
       }
     })
 
-     // Se o usuário não for encontrado, retorna
-      // HTTP 401: Unauthorized
-      if(! user){
-        console.error('ERRO DE LOGIN: usúario não encontrado')
-        return res.status(401).end()
-      } 
+    // Se o usuário não for encontrado, retorna
+    // HTTP 401: Unauthorized
+    if(! user) {
+      console.error('ERRO DE LOGIN: usuário não encontrado')
+      return res.status(401).end()
+    }
 
-        // Usuário encontrado, vamos conferir a senha
-        const passwordIsValid = await bcrypt.compare(req.body?.password, user.password)
-  
-        // Se a senha estiver errada, retorna
-        // HTTP 401: Unauthorized
-        if(! passwordIsValid){
-        console.error('ERRO DE LOGIN: senha inválida')
-        return res.status(401).end()
-        } 
+    // Usuário encontrado, vamos conferir a senha
+    const passwordIsValid = await bcrypt.compare(req.body?.password, user.password)
 
-        // Usuário/email e senha OK, passamos ao procedimento de gerar o token
-      const token = jwt.sign(
-        user,                       // Dados do usuário
-        process.env.TOKEN_SECRET,   // Senha para criptografar o token
-        { expiresIn: '24h' }        // Prazo de validade do token
-      )
+    // Se a senha estiver errada, retorna
+    // HTTP 401: Unauthorized
+    if(! passwordIsValid) {
+      console.error('ERRO DE LOGIN: senha inválida')
+      return res.status(401).end()
+    }
 
-      //retorna o token e o usuário autenticado, com o status
-      // HTTP 200: OK (implícito)
-      res.send({token, user})
+    // Deleta o campo "password" do objeto "user" antes de usá-lo
+    // no token e no valor de retorno
+    if(user.password) delete user.password
+
+    // Usuário/email e senha OK, passamos ao procedimento de gerar o token
+    const token = jwt.sign(
+      user,                       // Dados do usuário
+      process.env.TOKEN_SECRET,   // Senha para criptografar o token
+      { expiresIn: '24h' }        // Prazo de validade do token
+    )
+
+    // Retorna o token e o usuário autenticado, com o status
+    // HTTP 200: OK (implícito)
+    res.send({ token, user })
   }
   catch(error) {
     // Se algo de errado acontecer, cairemos aqui

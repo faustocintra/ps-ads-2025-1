@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
     ]
 })
 
-// Exibe no console as instruções SQL enviadas ao BD
+// exibe no console as instruções SQL enviadas ao BD
 prisma.$on('query', event => {
   console.log('-'.repeat(60))
   console.log(event.query)
