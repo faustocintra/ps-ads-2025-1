@@ -28,7 +28,7 @@ controller.create = async function (req, res) {
 
 controller.retrieveAll = async function (req, res) {
   try {
-    // Recupera todos os registros de clientes do banco de dados,
+    // Recupera todos os registros de carros do banco de dados,
     // ordenados pelo campo "model"
     const result = await prisma.car.findMany({
       orderBy: [ { model: 'asc' } ]
@@ -49,7 +49,7 @@ controller.retrieveAll = async function (req, res) {
 
 controller.retrieveOne = async function (req, res) {
   try {
-    // Busca no banco de dados apenas o cliente indicado
+    // Busca no banco de dados apenas o carro indicado
     // pelo parâmetro "id"
     const result = await prisma.car.findUnique({
       where: { id: Number(req.params.id) }

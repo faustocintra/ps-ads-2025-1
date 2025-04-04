@@ -1,15 +1,15 @@
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient({
-    log: [ 
-        { 
-            emit: 'event', 
-            level: 'query' 
-        } 
-    ]
+  log: [
+    {
+      emit: 'event',
+      level: 'query'
+    }
+  ]
 })
 
-// exibe no console as instruções SQL enviadas ao BD
+// Exibe no console as instruções SQL enviadas ao BD
 prisma.$on('query', event => {
   console.log('-'.repeat(60))
   console.log(event.query)

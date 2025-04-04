@@ -31,7 +31,7 @@ export default function BottomBar(){
             <CoffeeIcon 
             fontSize='small' 
             sx={{mb: -0.5}}
-            /> por <a href="mailto:ana.barbosa43@fatec.sp.gov.br">
+            /> por <a href="ana.barbosa43@fatec.sp.gov.br">
             Ana Júlia Andrade Barbosa</a>
             </Typography>     
         </Toolbar>

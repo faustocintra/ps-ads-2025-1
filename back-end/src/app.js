@@ -1,4 +1,4 @@
-//carregando as variáveis de ambientedo arquivo .env
+// Carregando as variáveis de ambiente do arquivo .env
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -10,12 +10,13 @@ import indexRouter from './routes/index.js'
 
 const app = express()
 
-//configurando o cors para aceitar requisições a partir
-//dos servidores configurados na variável de ambiente ALLOWED_ORIGINS
+// Configurando o CORS para aceitar requisições a partir
+// dos servidores configurados na variável de ambiente
+// ALLOWED_ORIGINS
 import cors from 'cors'
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS.split(','),
-    //credentials: true
+  origin: process.env.ALLOWED_ORIGINS.split(','),
+  // credentials: true
 }))
 
 app.use(logger('dev'))
@@ -24,11 +25,10 @@ app.use(urlencoded({ extended: false }))
 app.use(cookieParser())
 
 app.use('/', indexRouter)
-app.use('/users', usersRouter)
 
 //------------------- ROTAS ---------------------------
 
-//middleware de verificação de autorização
+// Middleware de verificação de autorização
 import authMiddleware from './middleware/auth.js'
 app.use(authMiddleware)
 
