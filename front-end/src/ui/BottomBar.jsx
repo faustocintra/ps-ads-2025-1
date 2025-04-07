@@ -31,8 +31,8 @@ export default function BottomBar(){
             <CoffeeIcon 
             fontSize='small' 
             sx={{mb: -0.5}}
-            /> por <a href="mailto:professor@faustocintra.com.br">
-            Prof. Fausto G. Cintra</a>
+            /> por <a href="mailto:rafaelasantosdeveloper@gmail.com">
+            Rafaela Aparecida Dos Santos</a>
             </Typography>     
         </Toolbar>
     )
