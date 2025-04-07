@@ -12,15 +12,15 @@ const bypassRoutes = [
   { url: '/users/login', method: 'POST' }
 ]
 
-export default function(req, res, next) {
+export default function (req, res, next) {
 
   /*
     Verificamos se a rota interceptada corresponde a alguma das
     exceções cadastradas acima. Sendo o caso, permite continuar
     sem verificar a autorização
   */
-  for(let route of bypassRoutes) {
-    if(route.url === req.url && route.method === req.method) {
+  for (let route of bypassRoutes) {
+    if (route.url === req.url && route.method === req.method) {
       next()    // Continua sem autenticação
       return
     }
@@ -28,7 +28,7 @@ export default function(req, res, next) {
 
   /* PROCESSO DE VERIFICAÇÃO DO TOKEN DE AUTORIZAÇÃO */
   let token
-  
+
   // Procura o token no cabeçalho de autorização
   const authHeader = req.headers['authorization']
 
@@ -36,11 +36,11 @@ export default function(req, res, next) {
 
   // Se o cabeçalho 'authorization' não existir, retorna
   // HTTP 403: Forbidden
-  if(! authHeader) {
+  if (!authHeader) {
     console.error('ERRO DE AUTORIZAÇÃO: falta de cabeçalho')
     return res.status(403).end()
   }
-  
+
   /*
     O cabeçalho de autorização tem o formato "Bearer XXXXX",
     onde "XXXXX" é o token. Portanto, precisamos dividir esse
@@ -55,7 +55,7 @@ export default function(req, res, next) {
 
     // Token inválido ou expirado, retorna
     // HTTP 403: Forbidden
-    if(error) {
+    if (error) {
       console.error('ERRO DE AUTORIZAÇÃO: token inválido ou expirado')
       return res.status(403).end()
     }
@@ -69,6 +69,6 @@ export default function(req, res, next) {
 
     // Token verificado e validado, podemos prosseguir
     next()
-    
+
   })
 }

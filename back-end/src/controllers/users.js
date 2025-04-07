@@ -9,7 +9,7 @@ controller.create = async function (req, res) {
     // Se existe o campo 'password' em req.body,
     // é necessário gerar o hash da senha antes
     // de armazená-lo no BD
-    if(req.body.password) {
+    if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 12)
     }
 
@@ -25,7 +25,7 @@ controller.create = async function (req, res) {
     // HTTP 201: Created
     res.status(201).end()
   }
-  catch(error) {
+  catch (error) {
     // Se algo de errado acontecer, cairemos aqui
     // Nesse caso, vamos exibir o erro no console e enviar
     // o código HTTP correspondente a erro do servidor
@@ -41,13 +41,13 @@ controller.retrieveAll = async function (req, res) {
     // ordenados pelo campo "model"
     const result = await prisma.user.findMany({
       omit: { password: true },         // Não retorna o campo 'password'
-      orderBy: [ { fullname: 'asc' } ]
+      orderBy: [{ fullname: 'asc' }]
     })
 
     // HTTP 200: OK (implícito)
     res.send(result)
   }
-  catch(error) {
+  catch (error) {
     // Se algo de errado acontecer, cairemos aqui
     // Nesse caso, vamos exibir o erro no console e enviar
     // o código HTTP correspondente a erro do servidor
@@ -67,12 +67,12 @@ controller.retrieveOne = async function (req, res) {
     })
 
     // Encontrou ~> HTTP 200: OK (implícito)
-    if(result) res.send(result)
+    if (result) res.send(result)
 
     // Não encontrou ~> HTTP 404: Not found
     else res.status(404).end()
   }
-  catch(error) {
+  catch (error) {
     // Se algo de errado acontecer, cairemos aqui
     // Nesse caso, vamos exibir o erro no console e enviar
     // o código HTTP correspondente a erro do servidor
@@ -82,12 +82,12 @@ controller.retrieveOne = async function (req, res) {
   }
 }
 
-controller.update = async function(req, res) {
+controller.update = async function (req, res) {
   try {
     // Se existe o campo 'password' em req.body,
     // é necessário gerar o hash da senha antes
     // de armazená-lo no BD
-    if(req.body.password) {
+    if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 12)
     }
 
@@ -101,17 +101,17 @@ controller.update = async function(req, res) {
     // Encontrou e atualizou ~> HTTP 204: No content
     res.status(204).end()
   }
-  catch(error) {
+  catch (error) {
     console.error(error)
-    
+
     // Não encontrou e não atualizou ~> HTTP 404: Not found
-    if(error?.code === 'P2025') res.status(404).end()
+    if (error?.code === 'P2025') res.status(404).end()
     // Outros tipos de erro ~> HTTP 500: Internal server error
     else res.status(500).end()
   }
 }
 
-controller.delete = async function(req, res) {
+controller.delete = async function (req, res) {
   try {
     await prisma.user.delete({
       where: { id: Number(req.params.id) }
@@ -120,11 +120,11 @@ controller.delete = async function(req, res) {
     // Encontrou e excluiu ~> HTTP 204: No content
     res.status(204).end()
   }
-  catch(error) {
+  catch (error) {
     console.error(error)
-    
+
     // Não encontrou e não excluiu ~> HTTP 404: Not found
-    if(error?.code === 'P2025') res.status(404).end()
+    if (error?.code === 'P2025') res.status(404).end()
     // Outros tipos de erro ~> HTTP 500: Internal server error
     else res.status(500).end()
   }
@@ -145,24 +145,25 @@ controller.login = async function (req, res) {
 
     // Se o usuário não for encontrado, retorna
     // HTTP 401: Unauthorized
-    if(! user) {
+    if (!user) {
       console.error('ERRO DE LOGIN: usuário não encontrado')
       return res.status(401).end()
     }
 
     // Usuário encontrado, vamos conferir a senha
     const passwordIsValid = await bcrypt.compare(req.body?.password, user.password)
+    //const passwordIsValid = req.body?.password === user.password
 
     // Se a senha estiver errada, retorna
     // HTTP 401: Unauthorized
-    if(! passwordIsValid) {
+    if (!passwordIsValid) {
       console.error('ERRO DE LOGIN: senha inválida')
       return res.status(401).end()
     }
 
     // Deleta o campo "password" do objeto "user" antes de usá-lo
     // no token e no valor de retorno
-    if(user.password) delete user.password
+    if (user.password) delete user.password
 
     // Usuário/email e senha OK, passamos ao procedimento de gerar o token
     const token = jwt.sign(
@@ -175,7 +176,7 @@ controller.login = async function (req, res) {
     // HTTP 200: OK (implícito)
     res.send({ token, user })
   }
-  catch(error) {
+  catch (error) {
     // Se algo de errado acontecer, cairemos aqui
     // Nesse caso, vamos exibir o erro no console e enviar
     // o código HTTP correspondente a erro do servidor
