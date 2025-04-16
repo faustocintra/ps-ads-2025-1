@@ -13,8 +13,8 @@ import { feedbackWait, feedbackNotify, feedbackConfirm } from '../../ui/Feedback
 import { useNavigate, useParams } from 'react-router-dom'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-import TextInput from '@mui/material/TextField'
 
+import fetchAuth from '../../lib/fetchAuth'
 
 export default function CarsForm() {
 
@@ -66,11 +66,11 @@ export default function CarsForm() {
   const params = useParams()
 
   const [state, setState] = React.useState({
-    cars: { ...formDefaults },
+    car: { ...formDefaults },
     formModified: false
   })
   const {
-    cars,
+    car,
     formModified
   } = state
 
@@ -84,14 +84,12 @@ export default function CarsForm() {
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
-        import.meta.env.VITE_API_BASE + '/cars/' + params.id 
-      )
+      const response = await fetchAuth.get('//' + params.id)
       const result = await response.json()
       
       /*Converte o formato da data armazenado no banco de dados para o formato reconhecido pelo componente DatePicker */
       if(result.selling_date) result.selling_date = parseISO(result.selling_date)
-      setState({ ...state, cars: result, formModified: false })
+      setState({ ...state, car: result, formModified: false })
     }
     catch(error) {
       console.log(error)
@@ -102,14 +100,14 @@ export default function CarsForm() {
     }
   }
 
-  /* Preenche o campo do objeto cars conforme o campo correspondente do formulário for modificado */
+  /* Preenche o campo do objeto car conforme o campo correspondente do formulário for modificado */
   function handleFieldChange(event) {
-    // Tira uma cópia da variável de estado cars
-    const carsCopy = { ...cars }
+    // Tira uma cópia da variável de estado car
+    const carsCopy = { ...car }
     // Altera em carsCopy apenas o campo da vez
     carsCopy[event.target.name] = event.target.value
-    // Atualiza a variável de estado, substituindo o objeto cars por sua cópia atualizada
-    setState({ ...state, cars: carsCopy, formModified: true })
+    // Atualiza a variável de estado, substituindo o objeto car por sua cópia atualizada
+    setState({ ...state, car: carsCopy, formModified: true })
   }
 
   // Função para salvar os dados do formulário
@@ -117,29 +115,15 @@ export default function CarsForm() {
     event.preventDefault()      // Impede o recarregamento da página
     feedbackWait(true)
     try {
-      // Prepara as opções para o fetch
-      const reqOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cars)
-      }
-
       /* Infoca o fetch para enviar os dados ao back-end.
       Se houver parâmetro na rota, significa que estamos alterando
       um registro existente e, portanto, o verbo precisa ser PUT */
       if(params.id) {
-        reqOptions.method = 'PUT'
-        await fetch(
-          import.meta.env.VITE_API_BASE + '/cars/' + params.id,
-          reqOptions
-        )
+        await fetchAuth.put('/cars/' + params.id, car)
       }
       // Senão, envia com o método POST para criar um novo registro
       else {
-        await fetch(
-          import.meta.env.VITE_API_BASE + '/cars',
-          reqOptions
-        )
+        await fetchAuth.post('/cars', car)
       }
 
       // Exibe uma mensagem de sucesso e vai para a página de listagem dos carros
@@ -187,7 +171,7 @@ export default function CarsForm() {
             fullWidth
             required
             autoFocus
-            value={cars.brand}
+            value={car.brand}
             onChange={handleFieldChange}
           />
           <TextField
@@ -196,7 +180,7 @@ export default function CarsForm() {
             label="Modelo do carro"
             fullWidth
             required
-            value={cars.model}
+            value={car.model}
             onChange={handleFieldChange}
           />
           <TextField
@@ -206,7 +190,7 @@ export default function CarsForm() {
             label="Cor"
             fullWidth
             required
-            value={cars.color}
+            value={car.color}
             onChange={handleFieldChange}
           > 
           {/* Lista de cores para selecionar */}
@@ -223,7 +207,7 @@ export default function CarsForm() {
             label="Ano de fabricação"
             fullWidth
             required
-            value={cars.year_manufacture}
+            value={car.year_manufacture}
             onChange={handleFieldChange}
           >
             {/* Lista de anos para selecionar */}
@@ -240,9 +224,9 @@ export default function CarsForm() {
               control={
                 <Checkbox
                   name='imported'
-                  checked={cars.imported}
+                  checked={car.imported}
                   onChange={(event)=> 
-                    setState({ ...state, cars: { ...cars, imported: event.target.checked}, formModified: true})
+                    setState({ ...state, car: { ...car, imported: event.target.checked}, formModified: true})
                   }
                 />
               }
@@ -252,7 +236,7 @@ export default function CarsForm() {
           {/* Campo para placa do carro com a máscara*/}
           <InputMask
             mask='AAA-9$99'
-            value={cars.plates}
+            value={car.plates}
             onChange={handleFieldChange}
             formatChars={platesMaskFormatChars}
           >
@@ -273,7 +257,7 @@ export default function CarsForm() {
             fullWidth
             required
             type='number'
-            value={cars.selling_price}
+            value={car.selling_price}
             onChange={handleFieldChange}
           />
 
@@ -290,7 +274,7 @@ export default function CarsForm() {
           >
             <DatePicker
               label="Data de venda"
-              value={cars.selling_date || null}
+              value={car.selling_date || null}
               slotProps={{
                 textField: {
                   variant: 'outlined',
@@ -331,7 +315,7 @@ export default function CarsForm() {
             flexDirection: 'column',
             width: '100%'
           }}>
-            {JSON.stringify(cars, null, 2)}
+            {JSON.stringify(car, null, 2)}
           </Box>
 
         </form>

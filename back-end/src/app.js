@@ -1,5 +1,4 @@
-
-//Carregando as vatriáveis de ambiente do arquivo. env
+// Carregando as variáveis de ambiente do arquivo .env
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -8,19 +7,16 @@ import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 
 import indexRouter from './routes/index.js'
-//import usersRouter from './routes/users.js'
 
 const app = express()
 
-//Configurando o CORS para aceitar requisições a partir 
-//dos servidores configurados na variável de ambiente
-
-//ALOWED_ORIGINS
+// Configurando o CORS para aceitar requisições a partir
+// dos servidores configurados na variável de ambiente
+// ALLOWED_ORIGINS
 import cors from 'cors'
 app.use(cors({
-origin: process.env.ALLOWED_ORIGINS.split(','),
-//credentials: true
-
+  origin: process.env.ALLOWED_ORIGINS.split(','),
+  // credentials: true
 }))
 
 app.use(logger('dev'))
@@ -30,14 +26,11 @@ app.use(cookieParser())
 
 app.use('/', indexRouter)
 
-
-//app.use('/users', usersRouter)
-
 //------------------- ROTAS ---------------------------
 
+// Middleware de verificação de autorização
 import authMiddleware from './middleware/auth.js'
 app.use(authMiddleware)
-
 
 import customersRouter from './routes/customers.js'
 app.use('/customers', customersRouter)
@@ -45,10 +38,7 @@ app.use('/customers', customersRouter)
 import carsRouter from './routes/cars.js'
 app.use('/cars', carsRouter)
 
-
 import usersRouter from './routes/users.js'
 app.use('/users', usersRouter)
-
-
 
 export default app

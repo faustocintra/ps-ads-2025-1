@@ -50,15 +50,6 @@ export default function MainMenu() {
         <MenuItem 
           onClick={handleClose}
           component={Link}
-          to="/novocomponente"
-          divider
-          >
-            Sobre a autora
-        </MenuItem>
-
-        <MenuItem 
-          onClick={handleClose}
-          component={Link}
           to="/customers"
           >
             Listagem de clientes

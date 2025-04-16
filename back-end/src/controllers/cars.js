@@ -28,23 +28,28 @@ controller.create = async function (req, res) {
 
 controller.retrieveAll = async function (req, res) {
   try {
+    // Recupera todos os registros de carros do banco de dados,
+    // ordenados pelo campo "model"
     const result = await prisma.car.findMany({
-      orderBy: [
-        { brand: 'asc' }  // ✅ Corrigido aqui!
-      ]
+      orderBy: [ { model: 'asc' } ]
     })
 
-    res.status(200).json(result)
+    // HTTP 200: OK (implícito)
+    res.send(result)
   }
   catch(error) {
-    console.error('Erro ao listar carros:', error)
-    res.status(500).json({ error: error.message || 'Erro interno do servidor' })
+    // Se algo de errado acontecer, cairemos aqui
+    // Nesse caso, vamos exibir o erro no console e enviar
+    // o código HTTP correspondente a erro do servidor
+    // HTTP 500: Internal Server Error
+    console.error(error)
+    res.status(500).end()
   }
 }
 
 controller.retrieveOne = async function (req, res) {
   try {
-    // Busca no banco de dados apenas o cliente indicado
+    // Busca no banco de dados apenas o carro indicado
     // pelo parâmetro "id"
     const result = await prisma.car.findUnique({
       where: { id: Number(req.params.id) }

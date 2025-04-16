@@ -1,17 +1,15 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Snackbar,
-  Backdrop,
-  CircularProgress,
-  ThemeProvider
-} from '@mui/material'
+import { ThemeProvider } from '@mui/material';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Snackbar from '@mui/material/Snackbar';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import MuiAlert from '@mui/material/Alert'
 import theme from './theme'
 
