@@ -15,6 +15,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
 import TextInput from '@mui/material/TextField'
 
+import fetchAuth from '../../lib/fetchAuth'
 
 export default function CarsForm() {
 
@@ -84,11 +85,9 @@ export default function CarsForm() {
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
-        import.meta.env.VITE_API_BASE + '/cars/' + params.id 
-      )
-      const result = await response.json()
-      
+      const result = await fetchAuth.get('/cars/' + params.id)
+            
+
       /*Converte o formato da data armazenado no banco de dados para o formato reconhecido pelo componente DatePicker */
       if(result.selling_date) result.selling_date = parseISO(result.selling_date)
       setState({ ...state, cars: result, formModified: false })
@@ -104,12 +103,18 @@ export default function CarsForm() {
 
   /* Preenche o campo do objeto cars conforme o campo correspondente do formulário for modificado */
   function handleFieldChange(event) {
-    // Tira uma cópia da variável de estado cars
+    // Vamos observar no console as informações que chegam
+    // à função handleFieldChange
+    console.log({ name: event.target.name, value: event.target.value })
+
+    // Tira uma cópia da variável de estado customer
     const carsCopy = { ...cars }
-    // Altera em carsCopy apenas o campo da vez
+    // Altera em customerCopy apenas o campo da vez
     carsCopy[event.target.name] = event.target.value
-    // Atualiza a variável de estado, substituindo o objeto cars por sua cópia atualizada
+    // Atualiza a variável de estado, substituindo o objeto
+    // customer por sua cópia atualizada
     setState({ ...state, cars: carsCopy, formModified: true })
+
   }
 
   // Função para salvar os dados do formulário
@@ -117,37 +122,21 @@ export default function CarsForm() {
     event.preventDefault()      // Impede o recarregamento da página
     feedbackWait(true)
     try {
-      // Prepara as opções para o fetch
-      const reqOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cars)
-      }
-
-      /* Infoca o fetch para enviar os dados ao back-end.
-      Se houver parâmetro na rota, significa que estamos alterando
-      um registro existente e, portanto, o verbo precisa ser PUT */
+      // Invoca o fetch para enviar os dados ao back-end.
+      // Se houver parâmetro na rota, significa que estamos alterando
+      // um registro existente e, portanto, o verbo precisa ser PUT
       if(params.id) {
-        reqOptions.method = 'PUT'
-        await fetch(
-          import.meta.env.VITE_API_BASE + '/cars/' + params.id,
-          reqOptions
-        )
+        await fetchAuth.put('/cars/' + params.id, cars)
       }
       // Senão, envia com o método POST para criar um novo registro
       else {
-        await fetch(
-          import.meta.env.VITE_API_BASE + '/cars',
-          reqOptions
-        )
+        await fetchAuth.post('/cars', cars)
       }
-
-      // Exibe uma mensagem de sucesso e vai para a página de listagem dos carros
       feedbackNotify('Item salvo com sucesso.', 'success', 4000, () => {
         // Retorna para a página de listagem
         navigate('..', { relative: 'path', replace: true })
       })
-
+    
     }
     catch(error) {
       console.log(error)
@@ -158,7 +147,6 @@ export default function CarsForm() {
     }
   }
 
-  // Função para voltar para a página anterior
   async function handleBackButtonClick() {
     if(
       formModified && 
