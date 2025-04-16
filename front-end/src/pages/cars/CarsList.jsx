@@ -11,6 +11,8 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 
+import fetchAuth from '../../lib/fetchAuth'
+
 export default function CarsList() {
 
   const columns = [
@@ -20,66 +22,62 @@ export default function CarsList() {
       width: 90 
     },
     {
-      field: 'brand',
+      field: 'brand_model',
       headerName: 'Marca/Modelo',
       width: 200,
-      // Exibe a marca e modelo juntos
-      renderCell: (params) => `${params.row.brand} / ${params.row.model}`,
+      valueGetter: (value, row) => `${row.brand} / ${row.model}`
     },
     {
       field: 'color',
       headerName: 'Cor',
-      width: 200,
+      width: 150,
     },
     {
       field: 'year_manufacture',
       headerName: 'Ano de fabricação',
-      width: 200,
+      width: 170,
     },
     {
       field: 'imported',
       headerName: 'É Importado?',
-      width: 200,
-      renderCell: (params) => (params.row.imported ? 'SIM' : ''), // Mostra SIM se o carro for importado ou uma string vazia caso não for
+      width: 140,
+      valueGetter: (value, row) => row.imported ? 'SIM' : ''
     },
     {
       field: 'plates',
       headerName: 'Placas',
-      width: 200,
+      width: 130,
     },
     {
       field: 'selling_price',
       headerName: 'Preço de venda',
-      width: 200,
-      // Formata o preço de venda, para o formato do Brasil
-      renderCell: (params) => params.row.selling_price?.toLocaleString('pt-BR', {
-         style: 'currency',
+      width: 160,
+      valueGetter: (value, row) => 
+        row.selling_price?.toLocaleString('pt-BR', {
+          style: 'currency',
           currency: 'BRL',
-      }),
+        })
     },
     {
       field: 'selling_date',
       headerName: 'Data de venda',
-      width: 200,
-      // Formata a data de venda
-      valueFormatter : (value) => 
-        value ? new Date(value).toLocaleDateString('pt-BR') : '',
+      width: 150,
+      valueGetter: (value, row) => 
+        row.selling_date ? new Date(row.selling_date).toLocaleDateString('pt-BR') : ''
     },
     {
       field: '_actions',
       headerName: 'Ações',
       width: 150,
       sortable: false,
-      renderCell: (params) => {
+      renderCell: params => {
         return <>
-        {/* Link para a página de edição do carro */}
           <Link to={'./' + params.id}>
             <IconButton aria-label="editar">
               <EditIcon />
             </IconButton>
           </Link>
 
-          {/* Botão para excluir o carro */}
           <IconButton 
             aria-label="excluir"
             onClick={() => handleDeleteButtonClick(params.id)}
@@ -93,24 +91,18 @@ export default function CarsList() {
 
   const [state, setState] = React.useState({
     cars: []
-  });
-  const {
-    cars
-  } = state
+  })
+
+  const { cars } = state
 
   React.useEffect(() => {
     loadData()
-  }, [])  // Vetor de dependências vazio, executa uma vez no mount
+  }, [])
 
-  // Função para carregar os dados da API
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
-        import.meta.env.VITE_API_BASE + '/cars'
-      )
-      const result = await response.json()
-
+      const result = await fetchAuth.get('/cars?by=brand')
       setState({ ...state, cars: result })
     }
     catch (error) {
@@ -122,18 +114,11 @@ export default function CarsList() {
     }
   }
 
-  // Função para excluir um carro
   async function handleDeleteButtonClick(id) {
     if(await feedbackConfirm('Deseja realmente excluir este item?')) {
       feedbackWait(true)
       try {
-        // Envia a requisição para exclusão
-        await fetch(
-          import.meta.env.VITE_API_BASE + `/cars/${id}`,
-          { method: 'DELETE' }
-        )
-
-        // Atualiza os dados do datagrid
+        await fetchAuth.delete(`/cars/${id}`)
         loadData()
         feedbackNotify('Exclusão efetuada com sucesso.')
       }
@@ -149,15 +134,14 @@ export default function CarsList() {
 
   return (
     <>
-      { /* gutterBottom coloca um espaçamento extra abaixo do componente */ }
       <Typography variant="h1" gutterBottom>
         Listagem de veículos
       </Typography>
 
       <Box sx={{
         display: 'flex',
-        justifyContent: 'right', // Alinhado à direita
-        mb: 2   // Margem inferior (margin-bottom)
+        justifyContent: 'right',
+        mb: 2
       }}>
         <Link to="./new">
           <Button 

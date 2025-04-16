@@ -13,12 +13,11 @@ import { feedbackWait, feedbackNotify, feedbackConfirm } from '../../ui/Feedback
 import { useNavigate, useParams } from 'react-router-dom'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-import TextInput from '@mui/material/TextField'
 
+import fetchAuth from '../../lib/fetchAuth'
 
 export default function CarsForm() {
 
-  // Lista de cores dos carros em ordem alfabética disponíveis para o usúario escolher
   const colors = [
     { value: 'AMARELO', label: 'AMARELO' },
     { value: 'AZUL', label: 'AZUL' },
@@ -35,22 +34,17 @@ export default function CarsForm() {
     { value: 'VERMELHO', label: 'VERMELHO' },
   ]
 
-  // Máscara para o formato da placa do carro
   const platesMaskFormatChars = {
-    '9': '[0-9]',    // somente dígitos
-    '$': '[0-9A-J]',  // dígito de 0 a 9 ou uma letra de A a J.
+    '9': '[0-9]',
+    '$': '[0-9A-J]',
     'A': '[A-Z]',
   }
 
-  // Cria um vetor com os anos disponíveis, do ano atual até 1951
   const years = [] 
-  // Date() pega a data atual. ex: 8 de novembro de 2024. O getFullYear() pega só o ano, ex: 2024
-  for (let year = new Date().getFullYear(); year >= 1951; year--) {   
-    years.push(year) // add no vetor years
+  for (let year = new Date().getFullYear(); year >= 1951; year--) {
+    years.push(year)
   }
 
-  /* Defini os valores padrão do formulário que são uma string vazia. selling_price e selling_date 
-  são null, porque são campos não obrigatórios. e imported é false porque é um bolleano */
   const formDefaults = {
     brand: '',
     model: '',
@@ -69,27 +63,19 @@ export default function CarsForm() {
     cars: { ...formDefaults },
     formModified: false
   })
-  const {
-    cars,
-    formModified
-  } = state
+  const { cars, formModified } = state
 
-  /*Se estivermos editando um carro, precisamos carregar seus dados assim que o componente for carregado */
   React.useEffect(() => {
-    /*Sabemos que estamos editando (e não cadastrando um novo) carro quando a rota ativa contiver um parâmetro id */
     if (params.id) loadData()
   }, [])
 
-  // Função para carregar os dados de um carro existente da API
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
+      const response = await fetchAuth(
         import.meta.env.VITE_API_BASE + '/cars/' + params.id 
       )
       const result = await response.json()
-      
-      /*Converte o formato da data armazenado no banco de dados para o formato reconhecido pelo componente DatePicker */
       if(result.selling_date) result.selling_date = parseISO(result.selling_date)
       setState({ ...state, cars: result, formModified: false })
     }
@@ -102,52 +88,39 @@ export default function CarsForm() {
     }
   }
 
-  /* Preenche o campo do objeto cars conforme o campo correspondente do formulário for modificado */
   function handleFieldChange(event) {
-    // Tira uma cópia da variável de estado cars
     const carsCopy = { ...cars }
-    // Altera em carsCopy apenas o campo da vez
     carsCopy[event.target.name] = event.target.value
-    // Atualiza a variável de estado, substituindo o objeto cars por sua cópia atualizada
     setState({ ...state, cars: carsCopy, formModified: true })
   }
 
-  // Função para salvar os dados do formulário
   async function handleFormSubmit(event) {
-    event.preventDefault()      // Impede o recarregamento da página
+    event.preventDefault()
     feedbackWait(true)
     try {
-      // Prepara as opções para o fetch
       const reqOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cars)
       }
 
-      /* Infoca o fetch para enviar os dados ao back-end.
-      Se houver parâmetro na rota, significa que estamos alterando
-      um registro existente e, portanto, o verbo precisa ser PUT */
       if(params.id) {
         reqOptions.method = 'PUT'
-        await fetch(
+        await fetchAuth(
           import.meta.env.VITE_API_BASE + '/cars/' + params.id,
           reqOptions
         )
       }
-      // Senão, envia com o método POST para criar um novo registro
       else {
-        await fetch(
+        await fetchAuth(
           import.meta.env.VITE_API_BASE + '/cars',
           reqOptions
         )
       }
 
-      // Exibe uma mensagem de sucesso e vai para a página de listagem dos carros
       feedbackNotify('Item salvo com sucesso.', 'success', 4000, () => {
-        // Retorna para a página de listagem
         navigate('..', { relative: 'path', replace: true })
       })
-
     }
     catch(error) {
       console.log(error)
@@ -158,20 +131,13 @@ export default function CarsForm() {
     }
   }
 
-  // Função para voltar para a página anterior
   async function handleBackButtonClick() {
-    if(
-      formModified && 
-      ! await feedbackConfirm('Há informações não salvas. Deseja realmente voltar?')
-    ) return // Sai da função sem fazer nada
-
-    // Aqui o usuário respondeu que quer voltar e perder os dados
+    if(formModified && ! await feedbackConfirm('Há informações não salvas. Deseja realmente voltar?')) return
     navigate('..', { relative: 'path', 'replace': true })
   }
 
   return (
     <>
-      { /* gutterBottom coloca um espaçamento extra abaixo do componente */ }
       <Typography variant="h1" gutterBottom>
         {params.id ? `Editar veículo #${params.id}` : 'Cadastrar novo veículo'}
       </Typography>
@@ -179,7 +145,6 @@ export default function CarsForm() {
       <Box className="form-fields">
         <form onSubmit={handleFormSubmit}>
 
-          {/* autoFocus = foco do teclado no primeiro campo */}
           <TextField
             variant="outlined" 
             name="brand"
@@ -209,12 +174,11 @@ export default function CarsForm() {
             value={cars.color}
             onChange={handleFieldChange}
           > 
-          {/* Lista de cores para selecionar */}
-          {colors.map(s => 
-                <MenuItem key={s.value} value={s.value}>
-                  {s.label}
-                </MenuItem>
-              )}
+            {colors.map(s => 
+              <MenuItem key={s.value} value={s.value}>
+                {s.label}
+              </MenuItem>
+            )}
           </TextField>
           <TextField
             select
@@ -226,46 +190,45 @@ export default function CarsForm() {
             value={cars.year_manufacture}
             onChange={handleFieldChange}
           >
-            {/* Lista de anos para selecionar */}
             {years.map(y => 
-                <MenuItem key={y} value={y}>
-                  {y}
-                </MenuItem>
-              )}
+              <MenuItem key={y} value={y}>
+                {y}
+              </MenuItem>
+            )}
           </TextField>
 
-          {/* Checkbox para marcar se o carro é importado */}
           <div className="MuiFormControl-root">
             <FormControlLabel
               control={
                 <Checkbox
                   name='imported'
                   checked={cars.imported}
-                  onChange={(event)=> 
-                    setState({ ...state, cars: { ...cars, imported: event.target.checked}, formModified: true})
+                  onChange={(event) => 
+                    setState({ ...state, cars: { ...cars, imported: event.target.checked }, formModified: true })
                   }
                 />
               }
               label='É importado?'
             />
           </div>    
-          {/* Campo para placa do carro com a máscara*/}
+
           <InputMask
             mask='AAA-9$99'
             value={cars.plates}
             onChange={handleFieldChange}
             formatChars={platesMaskFormatChars}
           >
-            { () => 
-                <TextField
-                  variant="outlined" 
-                  name="plates"
-                  label="Placa" 
-                  fullWidth
-                  required
-                />
+            {() => 
+              <TextField
+                variant="outlined" 
+                name="plates"
+                label="Placa" 
+                fullWidth
+                required
+              />
             }
           </InputMask>
+
           <TextField
             variant="outlined" 
             name="selling_price"
@@ -277,13 +240,6 @@ export default function CarsForm() {
             onChange={handleFieldChange}
           />
 
-          {/*
-            O evento onChange do componente DatePicker não passa
-            o parâmetro event, como no TextField, e sim a própria
-            data que foi modificada. Por isso, ao chamar a função
-            handleFieldChange no DatePicker, precisamos criar um
-            parâmetro event "fake" com as informações necessárias
-          */}
           <LocalizationProvider 
             dateAdapter={AdapterDateFns}
             adapterLocale={ptBR}
@@ -297,7 +253,7 @@ export default function CarsForm() {
                   fullWidth: true
                 }
               }}
-              onChange={ date => {
+              onChange={date => {
                 const event = { target: { name: 'selling_date', value: date } }
                 handleFieldChange(event)
               }}
@@ -336,7 +292,6 @@ export default function CarsForm() {
 
         </form>
       </Box>
-      
     </>
   )
 }
