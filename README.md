@@ -1,3 +1,6 @@
+# Lousa Virtual
+https://docs.google.com/document/d/1MwLTlhhFKExoHDPxViSs2iOXz2JomWHUgP6efFKrhfQ/edit?tab=t.0
+
 # Forkando e clonando este repositório
 1. Faça _login_ no [GitHub](https://github.com).
 2. Acesse [https://github.com/faustocintra/ps-ads-2025-1](https://github.com/faustocintra/ps-ads-2025-1).
