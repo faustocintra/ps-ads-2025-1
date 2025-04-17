@@ -43,10 +43,10 @@ model Car {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  fullname     String   
-  username     String   @unique // Não pode haver dois usuários com o mesmo username, ou seja, é um campo único, não pode se repetir na tabela
-  email        String   @unique // Não pode haver dois usuários com o mesmo email, ou seja, é um campo único, não pode se repetir na tabela
-  password     String   @unique // Não pode haver dois usuários com a mesma senha, ou seja, é um campo único, não pode se repetir na tabela
-  is_admin     Boolean  @default(false)
+  id                Int           @id @default(autoincrement())
+  fullname          String        // Nome completo
+  username          String        @unique   // Não pode se repetir na tabela
+  email             String        @unique
+  password          String        
+  is_admin          Boolean       @default(false)
 }

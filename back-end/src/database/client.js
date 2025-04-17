@@ -1,21 +1,18 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient({
   log: [
-    "query",
     {
-      emit: "event",
-      level: "query",
-    },
-  ],
-});
+      emit: 'event',
+      level: 'query'
+    }
+  ]
+})
 
-prisma.$on("query", (e) => {
-  console.log("Query: " + e.query);
-  console.log("Duration: " + e.duration + "ms");
-  if (e.params) {
-    console.log("Parameters: " + e.params);
-  }
-});
-
-export default prisma;
+// Exibe no console as instruções SQL enviadas ao BD
+prisma.$on('query', event => {
+  console.log('-'.repeat(60))
+  console.log(event.query)
+  if(event.params) console.log('PARAMS:', event.params)
+})
+export default prisma

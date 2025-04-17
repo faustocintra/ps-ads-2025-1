@@ -11,6 +11,8 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 
+import fetchAuth from '../../lib/fetchAuth'
+
 export default function CarsList() {
 
   const columns = [
@@ -106,10 +108,7 @@ export default function CarsList() {
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
-        import.meta.env.VITE_API_BASE + '/cars'
-      )
-      const result = await response.json()
+      const result = await fetchAuth.get('/cars')
 
       setState({ ...state, cars: result })
     }
@@ -128,10 +127,7 @@ export default function CarsList() {
       feedbackWait(true)
       try {
         // Envia a requisição para exclusão
-        await fetch(
-          import.meta.env.VITE_API_BASE + `/cars/${id}`,
-          { method: 'DELETE' }
-        )
+        await fetchAuth.delete(`/cars/${id}`)
 
         // Atualiza os dados do datagrid
         loadData()
