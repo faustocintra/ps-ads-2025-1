@@ -41,4 +41,7 @@ app.use('/cars', carsRouter)
 import usersRouter from './routes/users.js'
 app.use('/users', usersRouter)
 
+import sellerRouter from './routes/seller.js'
+app.use('/seller', sellerRouter)
+
 export default app
