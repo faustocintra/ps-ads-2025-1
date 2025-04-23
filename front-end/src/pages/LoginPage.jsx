@@ -12,6 +12,8 @@ import { feedbackNotify, feedbackWait } from '../ui/Feedback'
 
 import fetchAuth from '../lib/fetchAuth'
 
+import AuthContext from '../contexts/AuthContext'
+
 export default function LoginPage() {
 
   const [state, setState] = React.useState({
@@ -25,6 +27,8 @@ export default function LoginPage() {
     showPassword
   } = state
 
+  const { authState, setAuthState } = React.useContext(AuthContext)
+  
   const navigate = useNavigate()
 
   function handleChange(event) {
@@ -58,6 +62,9 @@ export default function LoginPage() {
         import.meta.env.VITE_AUTH_TOKEN_NAME,
         result.token
       )
+
+      //guarda no contexto as infos sobre o usuário autenticado
+      setAuthState({...authState, authUser: result.user})
 
       feedbackNotify(
         'Autenticação realizada com sucesso', 

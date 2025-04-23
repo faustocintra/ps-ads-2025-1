@@ -20,13 +20,26 @@ export default function AuthWidgets() {
 
   const navigate = useNavigate()
 
+   async function handleLogoutButtonClick() {
+    if (await feedbackConfirm('Deseja realmente sair?')) {
+      //apaga o token do localStorage
+      window.localStorage.removeItem(import.meta.env.VITE_AUTH_TOKEN_NAME)
+      //remove as infos do usuário do autenticado
+      setAuthState({...authState, authUser: null})
+      //redireciona para  a página de login
+      navigate('/login')
+    }
+    //feedback de logout
+    feedbackNotify('Logout realizado com sucesso!')
+  }
+
   if(authUser) return <>
     <AccountCirleIcon color="secondary" fontSize="small" sx={{ mr: 1}} />
     <Typography variant="caption"> {authUser.username} </Typography>
     <Button
       color="secondary"
       size="small"
-      onClick={() => {}}
+      onClick={handleLogoutButtonClick}
       sx={{ ml: 0.75 /* ml = marginLeft */ }} 
     >
       Sair
