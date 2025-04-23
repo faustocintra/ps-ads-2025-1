@@ -108,9 +108,8 @@ export default function CarsList() {
   async function loadData() {
     feedbackWait(true)
     try {
-
       const result = await fetchAuth.get('/cars')
-      
+
       setState({ ...state, cars: result })
     }
     catch (error) {
