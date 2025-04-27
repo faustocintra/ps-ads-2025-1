@@ -14,7 +14,16 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Tabela de clientes
+model Seller {
+  id                Int           @id @default(autoincrement())
+  fullname          String        // Nome completo
+  birth_date        DateTime      // Data de nascimento
+  identity_document String        @unique // CPF
+  email             String        @unique
+  phone             String        // Celular   
+  is_manager        Boolean       @default(false) // É gerente?
+}
+
 model Customer {
   id              Int           @id @default(autoincrement())
   name            String        @default("João das Couves")

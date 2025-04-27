@@ -32,6 +32,9 @@ app.use('/', indexRouter)
 import authMiddleware from './middleware/auth.js'
 app.use(authMiddleware)
 
+import sellerRouter from './routes/seller.js'
+app.use('/seller', sellerRouter)
+
 import customersRouter from './routes/customers.js'
 app.use('/customers', customersRouter)
 
