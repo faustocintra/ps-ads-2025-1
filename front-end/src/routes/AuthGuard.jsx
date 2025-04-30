@@ -19,8 +19,7 @@ export default function AuthGuard({ children, userLevel = 0 }) {
 
   const { authState, setAuthState } = React.useContext(AuthContext)
   const {
-    authUser,
-    redirectTo
+    authUser
   } = authState
 
   const [status, setStatus] = React.useState('IDLE')
@@ -51,16 +50,43 @@ export default function AuthGuard({ children, userLevel = 0 }) {
     }
   }
 
-  //Este useEffect será executado sempre que a rota (location) mudar
-    React.useEffect(() => {
-        /*
-            salva a rota atual para posterior redirecionamento (caso a 
-            atual não seja a de login)
-        */
-        if (!location.pathname.includes('/login')) {
-            setAuthState({ ...authState, redirectTo: location })
-        }
+  // Este useEffect será executado sempre que a rota (location) for alterada
+  React.useEffect(() => {
+    /*
+      Salva a rota atual para posterior redirecionamento (caso a rota atual
+      não seja o próprio login)
+    */
+    if(! location.pathname.includes('login')) {
+      setAuthState({ ...authState, redirectTo: location })
+    }
 
-        checkAuthUser
-    }, [location])
+    checkAuthUser()
+  }, [location])
+
+  if(status === 'PROCESSING') return <></>
+
+  /*
+    Se não há usuário autenticado e o nível de acesso (> 0) assim o
+    exige, redirecionamos para a página de login
+  */
+  if(!authUser && userLevel > 0) return <Navigate to="/login" replace />
+
+  /*
+    Senão, se há um usuário não administrador tentando acessar uma
+    rota de nível 2, mostramos uma mensagem de acesso negado
+  */
+  if(!(authUser?.is_admin) && userLevel === 2) return (
+    <Box>
+      <Typography variant="h2" color="error">
+        Acesso negado
+      </Typography>
+    </Box>
+  )
+
+  /*
+    Se chegou até aqui, é porque a rota é liberada para qualquer
+    um (nível 0) ou o usuário possui autorização para acessar o
+    nível
+  */
+  return children
 }
