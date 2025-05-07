@@ -10,12 +10,13 @@ export default function AppRoutes() {
       {
         routes.map(route => {
           let element
-          if(route.authLevel > 0) {
+          if(route.userLevel > 0) {
             element = <AuthGuard userLevel={route.userLevel}>
               {route.element}
             </AuthGuard>
           }
           else element = route.element
+          
           return <Route 
             key={route.route} 
             path={route.route}

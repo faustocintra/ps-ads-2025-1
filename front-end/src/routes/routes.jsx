@@ -13,6 +13,7 @@ import CarsList from '../pages/cars/CarsList'
 import CarsForm from '../pages/cars/CarsForm'
 
 import UsersList from '../pages/users/UsersList'
+import UsersForm from '../pages/users/UsersForm'
 
 const routes = [
   {
@@ -74,7 +75,20 @@ const routes = [
     description: 'Listagem de usuários',
     element: <UsersList />,
     userLevel: 2
-  }
+  },
+  {
+    route: '/users/new',
+    description: 'Cadastro de usuários',
+    element: <UsersForm />,
+    userLevel: 2
+  },
+  {
+    route: '/users/:id',
+    description: 'Alterar usuário',
+    element: <UsersForm />,
+    userLevel: 2,
+    omitFromMainMenu: true
+  },
 ]
 
 export default routes

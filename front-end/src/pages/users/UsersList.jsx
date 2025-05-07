@@ -41,7 +41,7 @@ export default function UsersList() {
       field: 'is_admin',
       headerName: 'É admin?',
       width: 150,
-      renderCell: (params) => (params.row.imported.is_admin ? <CheckBoxIcon /> : '')
+      renderCell: (params) => (params.row.is_admin ? <CheckBoxIcon /> : '')
     },
     {
       field: '_actions',
