@@ -28,7 +28,7 @@ export default function LoginPage() {
   } = state
 
   const { authState, setAuthState } = React.useContext(AuthContext)
-  
+
   const navigate = useNavigate()
 
   function handleChange(event) {
@@ -58,13 +58,13 @@ export default function LoginPage() {
       const result = await fetchAuth.post('/users/login', loginData)
 
       // Armazena o token retornado no localStorage para posterior utilização
-      window.localStorage.setItem(
-        import.meta.env.VITE_AUTH_TOKEN_NAME,
-        result.token
-      )
+      // window.localStorage.setItem(
+      //   import.meta.env.VITE_AUTH_TOKEN_NAME,
+      //   result.token
+      // )
 
-      //guarda no contexto as infos sobre o usuário autenticado
-      setAuthState({...authState, authUser: result.user})
+      // Guarda no contexto as informações sobre o usuário autenticado
+      setAuthState({ ...authState, authUser: result.user })
 
       feedbackNotify(
         'Autenticação realizada com sucesso', 

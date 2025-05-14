@@ -16,7 +16,7 @@ const app = express()
 import cors from 'cors'
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS.split(','),
-  // credentials: true
+  credentials: true   // Habilita o envio de cookies para o front-end
 }))
 
 app.use(logger('dev'))
@@ -40,8 +40,5 @@ app.use('/cars', carsRouter)
 
 import usersRouter from './routes/users.js'
 app.use('/users', usersRouter)
-
-import sellersRouter from './routes/sellers.js'
-app.use('/sellers', sellersRouter)
 
 export default app

@@ -109,7 +109,7 @@ export default function UsersForm() {
         Caso contrário, estamos criando um novo usuário, e enviaremos a
         requisição com o método POST
       */
-      else fetchAuth.post('/users', user)
+      else await fetchAuth.post('/users', user)
 
       /*
         A requisição sendo bem-sucedida, vamos exibir a mensagem de feedback
