@@ -22,12 +22,19 @@ export default function AuthWidgets() {
 
   async function handleLogoutButtonClick() {
     if(await feedbackConfirm('Deseja realmente sair?')) {
-      // Apaga o token do localStorage
-      window.localStorage.removeItem(import.meta.env.VITE_AUTH_TOKEN_NAME)
-      // Remove as informações do usuário autenticado
-      setAuthState({ ...authState, authUser: null })
-      // Redireciona para a página de login
-      navigate('/login')
+      feedbackWait(true)
+      try{
+        await fetchAuth.post('/users/logout')
+        // Apaga as informações (em memória) do usuário autenticado
+        setAuthState({ ...authState, authUser: null })
+        // Navega para a página de login
+        navigate('/login', { replace: true })
+      }catch(error) {
+        console.error(error)
+        feedbackNotify(error.message, 'error')
+      }finally {
+        feedbackWait(false)
+      }
     }
   }
 

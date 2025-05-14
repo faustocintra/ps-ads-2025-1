@@ -16,7 +16,7 @@ const app = express()
 import cors from 'cors'
 app.use(cors({
     origin: process.env.ALLOWED_ORIGINS.split(','),
-    //credentials: true
+    credentials: true  //Habilita o envio de cookies para o front-end
 }))
 
 app.use(logger('dev'))

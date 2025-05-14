@@ -17,6 +17,9 @@ const theme = createTheme({
             fontSize: '3rem',
             fontWeight: 'bold'
         }
+        ,h2: {
+            fontSize: '2rem',
+        }
     }
 },ptBR)
 export default theme
