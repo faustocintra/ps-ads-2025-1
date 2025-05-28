@@ -67,7 +67,7 @@ const routes = [
     {
         route: '/cars/:id',
         description: 'Alterar veículo',
-        element: <carsForm />,
+        element: <CarsForm />,
         userLevel: 2,
         omitFromMainMenu: true
     },
