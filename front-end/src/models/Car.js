@@ -22,14 +22,14 @@ const validColors = [
 
 const Car = z.object({
   brand: z.string()
-    .trim()  // Retira espaços em branco do início e do fim
-    .min(1, { message: 'A marca deve ter, no mínimo, 1 caractere.' })
-    .max(25, { message: 'A marca pode ter, no máximo, 25 caracteres.' }),
+    .trim()  // Remove espaços em branco do início e do fim
+    .min(1, { message: 'A marca deve ter no mínimo 1 caractere.' })
+    .max(25, { message: 'A marca pode ter no máximo 25 caracteres.' }),
   
   model: z.string()
-    .trim()  // Retira espaços em branco do início e do fim
-    .min(1, { message: 'O modelo deve ter, no mínimo, 1 caractere.' })
-    .max(25, { message: 'O modelo pode ter, no máximo, 25 caracteres.' }),
+    .trim() 
+    .min(1, { message: 'O modelo deve ter no mínimo 1 caractere.' })
+    .max(25, { message: 'O modelo pode ter no máximo 25 caracteres.' }),
   
   color: z.enum(validColors, { 
     message: 'Cor inválida ou não informada.' 
@@ -41,13 +41,13 @@ const Car = z.object({
     .max(maxYear, { message: `O ano de fabricação não pode ser maior que o ano atual (${maxYear}).` }),
   
   imported: z.boolean({
-    message: 'O campo importado deve ser um valor booleano (verdadeiro ou falso).'
+    message: 'O campo importado deve verdadeiro ou falso.'
   }),
   
   plates: z.string()
     .transform(val => val.replace('_', ''))
-    // Depois de um transform(), o Zod não permite usar length(). Por isso,
-    // devemos usar uma função personalizada com refine() para validar o
+    // Depois de um transform(), o Zod não permite usar length().
+    // Então usamos uma função personalizada com refine() para validar o
     // comprimento do valor
     .transform(val => val.trim())
     .refine(val => val.length === 8, {
@@ -61,12 +61,12 @@ const Car = z.object({
     .max(maxSellingDate, {
       message: 'A data de venda não pode ser posterior à data atual.'
     })
-    .nullish(), // Campo opcional
+    .nullish(), 
   
   selling_price: z.coerce.number()
-    .gte(1000, { message: 'O preço de venda deve ser de no mínimo R$ 1.000,00.' })
-    .lte(5000000, { message: 'O preço de venda deve ser de no máximo R$ 5.000.000,00.' })
-    .nullish() // Campo opcional
+    .gte(1000, { message: 'O preço de venda deve ser, no mínimo R$ 1.000,00.' })
+    .lte(5000000, { message: 'O preço de venda deve ser, no máximo R$ 5.000.000,00.' })
+    .nullish() 
 })
 
 export default Car

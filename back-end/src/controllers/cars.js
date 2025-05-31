@@ -1,23 +1,9 @@
-
 import prisma from '../database/client.js'
-import Car from '../models/Car.js'
-import { ZodError } from 'zod'
 
 const controller = {}   // Objeto vazio
 
 controller.create = async function (req, res) {
   try {
-
-    // Garante que a data de venda esteja no formato correto
-    // antes da validação
-    if(req.body.selling_date) req.body.selling_date = new Date(req.body.selling_date)
-    
-    // Executa a validação do modelo do Zod para os
-    // dados que vieram em req.body
-    Car.parse(req.body)
-
-    console.log('CAR DATA:', req.body)
-  
     // Dentro do parâmetro req (requisição), haverá
     // um objeto chamado "body" que contém as informações
     // que queremos armazenar do BD. Então, invocamos o
@@ -32,21 +18,18 @@ controller.create = async function (req, res) {
   }
   catch(error) {
     // Se algo de errado acontecer, cairemos aqui
+    // Nesse caso, vamos exibir o erro no console e enviar
+    // o código HTTP correspondente a erro do servidor
+    // HTTP 500: Internal Server Error
     console.error(error)
-
-    // Se for erro de validação do Zod, retorna
-    // HTTP 422: Unprocessable entity
-    if(error instanceof ZodError) res.status(422).send(error.issues)
-    
-    // Senão, retorna o habitual HTTP 500: Internal Server Error
-    else res.status(500).end()
+    res.status(500).end()
   }
 }
 
 controller.retrieveAll = async function (req, res) {
   try {
-    // Recupera todos os registros de clientes do banco de dados,
-    // ordenados pelo campo "name"
+    // Recupera todos os registros de carros do banco de dados,
+    // ordenados pelo campo "model"
     const result = await prisma.car.findMany({
       orderBy: [ { model: 'asc' } ]
     })
@@ -90,14 +73,6 @@ controller.retrieveOne = async function (req, res) {
 
 controller.update = async function(req, res) {
   try {
-    // Garante que a data de venda esteja no formato correto
-    // antes da validação
-    if(req.body.selling_date) req.body.selling_date = new Date(req.body.selling_date)
-    
-    // Executa a validação do modelo do Zod para os
-    // dados que vieram em req.body
-    Car.parse(req.body)
-    
     // Busca o registro no banco de dados pelo seu id
     // e atualiza as informações com o conteúdo de req.body
     await prisma.car.update({
@@ -109,20 +84,12 @@ controller.update = async function(req, res) {
     res.status(204).end()
   }
   catch(error) {
-    //se algo de errado acontecer, cairemos aqui 
     console.error(error)
     
     // Não encontrou e não atualizou ~> HTTP 404: Not found
     if(error?.code === 'P2025') res.status(404).end()
-    
-    // Se for erro de validação do Zod, retorna
-    // HTTP 422: Unprocessable entity
-    else if(error instanceof ZodError) res.status(422).send(error.issues)
-    
-    // Senão, retorna o habitual HTTP 500: Internal Server Error
+    // Outros tipos de erro ~> HTTP 500: Internal server error
     else res.status(500).end()
-
-    console.error(error)
   }
 }
 

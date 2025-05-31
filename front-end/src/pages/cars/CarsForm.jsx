@@ -13,6 +13,8 @@ import { feedbackWait, feedbackNotify, feedbackConfirm } from '../../ui/Feedback
 import { useNavigate, useParams } from 'react-router-dom'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
+import Car from '../../models/Car'
+import { ZodError } from 'zod'
 
 import fetchAuth from '../../lib/fetchAuth'
 
@@ -67,11 +69,13 @@ export default function CarsForm() {
 
   const [state, setState] = React.useState({
     car: { ...formDefaults },
-    formModified: false
+    formModified: false,
+    inputErrors: true
   })
   const {
     car,
-    formModified
+    formModified,
+    inputErrors
   } = state
 
   /*Se estivermos editando um carro, precisamos carregar seus dados assim que o componente for carregado */
@@ -80,16 +84,15 @@ export default function CarsForm() {
     if (params.id) loadData()
   }, [])
 
-  // Função para carregar os dados de um carro existente da API
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetchAuth.get('//' + params.id)
-      const result = await response.json()
+      const result = await fetchAuth.get('/cars/' + params.id)
       
       /*Converte o formato da data armazenado no banco de dados para o formato reconhecido pelo componente DatePicker */
       if(result.selling_date) result.selling_date = parseISO(result.selling_date)
-      setState({ ...state, car: result, formModified: false })
+      
+        setState({ ...params, car: result })
     }
     catch(error) {
       console.log(error)
@@ -102,6 +105,10 @@ export default function CarsForm() {
 
   /* Preenche o campo do objeto car conforme o campo correspondente do formulário for modificado */
   function handleFieldChange(event) {
+   // Vamos observar no console as informações que chegam
+    // à função handleFieldChange
+    console.log({ name: event.target.name, value: event.target.value })
+
     // Tira uma cópia da variável de estado car
     const carsCopy = { ...car }
     // Altera em carsCopy apenas o campo da vez
@@ -110,12 +117,19 @@ export default function CarsForm() {
     setState({ ...state, car: carsCopy, formModified: true })
   }
 
-  // Função para salvar os dados do formulário
   async function handleFormSubmit(event) {
     event.preventDefault()      // Impede o recarregamento da página
     feedbackWait(true)
     try {
-      /* Infoca o fetch para enviar os dados ao back-end.
+
+      // Converte o campo selling_date de string para Date, caso exista
+      //if(customer.selling_date) customer.selling_date = new Date(customer.selling_date)
+      
+      // Invoca a validação do Zod
+      Car.parse(car)
+
+
+      /* Invoca o fetch para enviar os dados ao back-end.
       Se houver parâmetro na rota, significa que estamos alterando
       um registro existente e, portanto, o verbo precisa ser PUT */
       if(params.id) {
@@ -135,7 +149,16 @@ export default function CarsForm() {
     }
     catch(error) {
       console.log(error)
-      feedbackNotify('ERRO: ' + error.message, 'error')
+
+      if(error instanceof ZodError) {
+        // Formamos um objeto contendo os erros do Zod e os colocamos
+        // na variável de estado inputErrors
+        const errorMessages = {}
+        for(let i of error.issues) errorMessages[i.path[0]] = i.message
+        setState({ ...state, inputErrors: errorMessages })
+        feedbackNotify('Há campos com valores inválidos. Verifique.', 'error')
+      }
+      else feedbackNotify('ERRO: ' + error.message, 'error')
     }
     finally {
       feedbackWait(false)
@@ -173,6 +196,8 @@ export default function CarsForm() {
             autoFocus
             value={car.brand}
             onChange={handleFieldChange}
+            error={Boolean(inputErrors?.brand)}
+            helperText={inputErrors?.brand}
           />
           <TextField
             variant="outlined" 
@@ -182,6 +207,8 @@ export default function CarsForm() {
             required
             value={car.model}
             onChange={handleFieldChange}
+            error={Boolean(inputErrors?.model)}
+            helperText={inputErrors?.model}
           />
           <TextField
             select
@@ -192,6 +219,8 @@ export default function CarsForm() {
             required
             value={car.color}
             onChange={handleFieldChange}
+            error={Boolean(inputErrors?.color)}
+            helperText={inputErrors?.color}
           > 
           {/* Lista de cores para selecionar */}
           {colors.map(s => 
@@ -209,6 +238,8 @@ export default function CarsForm() {
             required
             value={car.year_manufacture}
             onChange={handleFieldChange}
+            error={Boolean(inputErrors?.year_manufacture)}
+            helperText={inputErrors?.year_manufacture}
           >
             {/* Lista de anos para selecionar */}
             {years.map(y => 
@@ -239,6 +270,7 @@ export default function CarsForm() {
             value={car.plates}
             onChange={handleFieldChange}
             formatChars={platesMaskFormatChars}
+            
           >
             { () => 
                 <TextField
@@ -247,6 +279,8 @@ export default function CarsForm() {
                   label="Placa" 
                   fullWidth
                   required
+                  error={Boolean(inputErrors?.plates)}
+                  helperText={inputErrors?.plates}
                 />
             }
           </InputMask>
@@ -259,6 +293,8 @@ export default function CarsForm() {
             type='number'
             value={car.selling_price}
             onChange={handleFieldChange}
+            error={Boolean(inputErrors?.selling_price)}
+            helperText={inputErrors?.selling_price}
           />
 
           {/*
@@ -278,7 +314,9 @@ export default function CarsForm() {
               slotProps={{
                 textField: {
                   variant: 'outlined',
-                  fullWidth: true
+                  fullWidth: true,
+                  error: Boolean(inputErrors?.selling_date),
+                  helperText: inputErrors?.selling_date
                 }
               }}
               onChange={ date => {
