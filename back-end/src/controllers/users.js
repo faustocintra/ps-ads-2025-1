@@ -183,7 +183,7 @@ controller.login = async function (req, res) {
 
     // Retorna o token e o usuário autenticado, com o status
     // HTTP 200: OK (implícito)
-    res.send({ user })
+    res.send({ user, token })
   }
   catch(error) {
     // Se algo de errado acontecer, cairemos aqui
