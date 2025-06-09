@@ -29,21 +29,19 @@ export default function CarsForm() {
   const navigate = useNavigate()
   const params = useParams()
 
-  // 2. INICIALIZAÇÃO DO REACT-HOOK-FORM
-  // Ele vai gerenciar todo o estado do formulário e as validações
   const {
-    control,          // Para componentes complexos (DatePicker, InputMask)
-    register,         // Para registrar os campos normais
-    handleSubmit,     // Para gerenciar o evento de submit
-    reset,            // Para carregar dados iniciais no formulário
-    watch,            // Para observar os valores do formulário (usado no debug)
+    control,
+    register,
+    handleSubmit,
+    reset,
+    watch,
     formState: {
-      errors,         // Objeto com todos os erros de validação
-      isDirty         // Equivalente ao "formModified"
+      errors,
+      isDirty
     }
   } = useForm({
-    resolver: zodResolver(Car), // Integra o Zod com o react-hook-form
-    defaultValues: formDefaults // Define os valores iniciais
+    resolver: zodResolver(Car),
+    defaultValues: formDefaults
   })
 
   React.useEffect(() => {
@@ -53,13 +51,11 @@ export default function CarsForm() {
   async function loadData() {
     feedbackWait(true)
     try {
-      // O nome do endpoint no back-end provavelmente é 'cars'
       const response = await fetchAuth.get(`/cars/${params.id}`)
       const result = await response.json()
       
       if(result.selling_date) result.selling_date = parseISO(result.selling_date)
       
-      // 3. USA O 'RESET' PARA POPULAR O FORMULÁRIO COM OS DADOS CARREGADOS
       reset(result)
 
     } catch(error) {
@@ -70,12 +66,10 @@ export default function CarsForm() {
     }
   }
 
-  // 4. FUNÇÃO DE SALVAR é chamada pelo handleSubmit e recebe os dados já validados
   async function saveData(data) {
     feedbackWait(true)
     try {
       if(params.id) {
-        // Usa o objeto 'data' que já vem validado e formatado
         await fetchAuth.put(`/cars/${params.id}`, data)
       } else {
         await fetchAuth.post('/cars', data)
@@ -87,7 +81,6 @@ export default function CarsForm() {
 
     } catch(error) {
       console.log(error)
-      // Aqui podemos melhorar a notificação de erro futuramente
       feedbackNotify('ERRO: ' + error.message, 'error')
     } finally {
       feedbackWait(false)
@@ -95,7 +88,6 @@ export default function CarsForm() {
   }
 
   async function handleBackButtonClick() {
-    // Usa o 'isDirty' do react-hook-form para saber se o formulário foi alterado
     if(isDirty && !await feedbackConfirm('Há informações não salvas. Deseja realmente voltar?')) return
 
     navigate('..', { relative: 'path', 'replace': true })
@@ -107,11 +99,11 @@ export default function CarsForm() {
         {params.id ? `Editar veículo #${params.id}` : 'Cadastrar novo veículo'}
       </Typography>
 
-      {/* 5. O SUBMIT DO FORMULÁRIO AGORA É GERENCIADO PELO handleSubmit */}
+      {}
       <Box className="form-fields">
         <form onSubmit={handleSubmit(saveData)}>
 
-          {/* 6. CAMPOS CONECTADOS COM O REACT-HOOK-FORM */}
+          {}
           <TextField
             variant="outlined" 
             label="Marca do carro"
@@ -137,7 +129,7 @@ export default function CarsForm() {
             label="Cor"
             fullWidth
             required
-            defaultValue="" // Importante para o select
+            defaultValue=""
             {...register('color')}
             error={!!errors.color}
             helperText={errors.color?.message}
@@ -150,8 +142,8 @@ export default function CarsForm() {
             label="Ano de fabricação"
             fullWidth
             required
-            defaultValue="" // Importante para o select
-            {...register('year_manufacture', { valueAsNumber: true })} // Converte o valor para número
+            defaultValue=""
+            {...register('year_manufacture', { valueAsNumber: true })}
             error={!!errors.year_manufacture}
             helperText={errors.year_manufacture?.message}
           >
@@ -167,7 +159,7 @@ export default function CarsForm() {
             />
           </div> 
           
-          {/* 7. COMPONENTES COMPLEXOS USAM O <Controller> */}
+          {}
           <Controller
             name="plates"
             control={control}
@@ -196,7 +188,7 @@ export default function CarsForm() {
             label="Preço de venda"
             fullWidth
             type='number'
-            {...register('selling_price')} // Converte o valor para número
+            {...register('selling_price')}
             error={!!errors.selling_price}
             helperText={errors.selling_price?.message}
           />
@@ -231,7 +223,7 @@ export default function CarsForm() {
             </Button>
           </Box>
 
-          {/* Debug: mostra o estado atual do formulário */}
+          {}
           <Box sx={{ fontFamily: 'monospace', display: 'flex', flexDirection: 'column', width: '100%', mt: 4 }}>
             <Typography variant="h6">Form State (Debug):</Typography>
             <pre>{JSON.stringify(watch(), null, 2)}</pre>

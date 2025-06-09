@@ -32,19 +32,16 @@ const Car = z.object({
 selling_date: z.coerce.date({ invalid_type_error: "Forneça uma data válida." })
   .min(new Date('2020-01-01'), { message: 'A data de venda deve ser a partir de 01/01/2020' })
   .max(new Date(), { message: 'A data de venda não pode ser futura' })
-  .nullable() // Permite que o valor seja nulo (DatePicker envia null quando vazio)
-  .optional(), // Garante que é opcional
+  .nullable()
+  .optional(),
 
 selling_price: z.preprocess(
-  // Se o valor for uma string vazia, converte para undefined.
-  // Senão, mantém o valor para a próxima validação.
   val => val === '' ? undefined : val,
   
-  // Agora, o validador de número só roda se o valor não for undefined.
   z.coerce.number({ invalid_type_error: 'O preço deve ser um número.' })
     .gte(1000, { message: 'O preço deve ser no mínimo R$ 1.000,00' })
     .lte(5000000, { message: 'O preço de venda deve ser no máximo R$ 5.000.000,00' })
-    .optional() // Garante que é opcional
+    .optional()
 )
 })
 
