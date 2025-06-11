@@ -29,26 +29,34 @@ export default function (req, res, next) {
   /* PROCESSO DE VERIFICAÇÃO DO TOKEN DE AUTORIZAÇÃO */
   let token
 
-  // Procura o token no cabeçalho de autorização
-  const authHeader = req.headers['authorization']
+  // 1. PROCURA O TOKEN EM UM COOKIE
+  token = req.cookies[process.env.AUTH_COOKIE_NAME]
 
-  console.log('CABEÇALHO DE AUTORIZAÇÃO ~>', authHeader)
+  // 2. SE NÃO HOVER TOKEN NO COOKIE, PROCURA NO HEADER DE
+  // AUTORIZAÇÃO
 
-  // Se o cabeçalho 'authorization' não existir, retorna
-  // HTTP 403: Forbidden
-  if (!authHeader) {
-    console.error('ERRO DE AUTORIZAÇÃO: falta de cabeçalho')
-    return res.status(403).end()
+  if (!token) {
+    // Procura o token no cabeçalho de autorização
+    const authHeader = req.headers['authorization']
+
+    console.log('CABEÇALHO DE AUTORIZAÇÃO ~>', authHeader)
+
+    // Se o cabeçalho 'authorization' não existir, retorna
+    // HTTP 403: Forbidden
+    if (!authHeader) {
+      console.error('ERRO DE AUTORIZAÇÃO: falta de cabeçalho')
+      return res.status(403).end()
+    }
+
+    /*
+      O cabeçalho de autorização tem o formato "Bearer XXXXX",
+      onde "XXXXX" é o token. Portanto, precisamos dividir esse
+      cabeçalho (string) em duas partes, cortando-o onde está o
+      caracter de espaço e aproveitando apenas a segunda parte
+      (índice 1).
+    */
+    token = authHeader.split(' ')[1]
   }
-
-  /*
-    O cabeçalho de autorização tem o formato "Bearer XXXXX",
-    onde "XXXXX" é o token. Portanto, precisamos dividir esse
-    cabeçalho (string) em duas partes, cortando-o onde está o
-    caracter de espaço e aproveitando apenas a segunda parte
-    (índice 1).
-  */
-  token = authHeader.split(' ')[1]
 
   // Validação do token
   jwt.verify(token, process.env.TOKEN_SECRET, (error, user) => {

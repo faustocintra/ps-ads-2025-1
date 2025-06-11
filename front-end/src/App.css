@@ -8,7 +8,7 @@
   visibility: visible;
 }
 
-.form-fields form{
+.form-fields form {
   margin: 0 auto;
   max-width: 95%;
   display: flex;
@@ -16,7 +16,7 @@
   flex-wrap: wrap;
 }
 
-.form-fields .MuiFormControl-root{
+.form-fields .MuiFormControl-root {
   min-width: 250px;
   max-width: 500px;
   width: 500px;

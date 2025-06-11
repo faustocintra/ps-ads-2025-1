@@ -11,13 +11,15 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 
+import fetchAuth from '../../lib/fetchAuth'
+
 export default function CarsList() {
 
   const columns = [
-    { 
-      field: 'id', 
-      headerName: 'Cód.', 
-      width: 90 
+    {
+      field: 'id',
+      headerName: 'Cód.',
+      width: 90
     },
     {
       field: 'brand',
@@ -53,8 +55,8 @@ export default function CarsList() {
       width: 200,
       // Formata o preço de venda, para o formato do Brasil
       renderCell: (params) => params.row.selling_price?.toLocaleString('pt-BR', {
-         style: 'currency',
-          currency: 'BRL',
+        style: 'currency',
+        currency: 'BRL',
       }),
     },
     {
@@ -62,7 +64,7 @@ export default function CarsList() {
       headerName: 'Data de venda',
       width: 200,
       // Formata a data de venda
-      valueFormatter : (value) => 
+      valueFormatter: (value) =>
         value ? new Date(value).toLocaleDateString('pt-BR') : '',
     },
     {
@@ -72,7 +74,7 @@ export default function CarsList() {
       sortable: false,
       renderCell: (params) => {
         return <>
-        {/* Link para a página de edição do carro */}
+          {/* Link para a página de edição do carro */}
           <Link to={'./' + params.id}>
             <IconButton aria-label="editar">
               <EditIcon />
@@ -80,7 +82,7 @@ export default function CarsList() {
           </Link>
 
           {/* Botão para excluir o carro */}
-          <IconButton 
+          <IconButton
             aria-label="excluir"
             onClick={() => handleDeleteButtonClick(params.id)}
           >
@@ -106,10 +108,7 @@ export default function CarsList() {
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
-        import.meta.env.VITE_API_BASE + '/cars'
-      )
-      const result = await response.json()
+      const result = await fetchAuth.get('/cars')
 
       setState({ ...state, cars: result })
     }
@@ -124,14 +123,11 @@ export default function CarsList() {
 
   // Função para excluir um carro
   async function handleDeleteButtonClick(id) {
-    if(await feedbackConfirm('Deseja realmente excluir este item?')) {
+    if (await feedbackConfirm('Deseja realmente excluir este item?')) {
       feedbackWait(true)
       try {
         // Envia a requisição para exclusão
-        await fetch(
-          import.meta.env.VITE_API_BASE + `/cars/${id}`,
-          { method: 'DELETE' }
-        )
+        await fetchAuth.delete(`/cars/${id}`)
 
         // Atualiza os dados do datagrid
         loadData()
@@ -149,7 +145,7 @@ export default function CarsList() {
 
   return (
     <>
-      { /* gutterBottom coloca um espaçamento extra abaixo do componente */ }
+      { /* gutterBottom coloca um espaçamento extra abaixo do componente */}
       <Typography variant="h1" gutterBottom>
         Listagem de veículos
       </Typography>
@@ -160,11 +156,11 @@ export default function CarsList() {
         mb: 2   // Margem inferior (margin-bottom)
       }}>
         <Link to="./new">
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             size="large"
             color="secondary"
-            startIcon={ <AddCircleIcon /> }
+            startIcon={<AddCircleIcon />}
           >
             Novo veículo
           </Button>

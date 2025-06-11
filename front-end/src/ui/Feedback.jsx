@@ -1,17 +1,15 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Snackbar,
-  Backdrop,
-  CircularProgress,
-  ThemeProvider
-} from '@mui/material'
+import { ThemeProvider } from '@mui/material';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Snackbar from '@mui/material/Snackbar';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import MuiAlert from '@mui/material/Alert'
 import theme from './theme'
 
@@ -42,7 +40,7 @@ const ConfirmDialog = ({ open, title, question, onConfirm, onCancel }) => {
 }
 
 const feedbackConfirm = (question, title = 'Confirmar') => {
-  
+
   const slot = document.createElement('div')
   document.querySelector('#innerRoot').appendChild(slot)
   const outlet = createRoot(slot)
@@ -71,7 +69,7 @@ const feedbackConfirm = (question, title = 'Confirmar') => {
 
 }
 
-const Notification = ({open, message, severity, timeout, onClose}) => {
+const Notification = ({ open, message, severity, timeout, onClose }) => {
 
   const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
@@ -80,14 +78,14 @@ const Notification = ({open, message, severity, timeout, onClose}) => {
   return (
     <Snackbar open={open} autoHideDuration={timeout} onClose={onClose}>
       <Alert onClose={onClose} severity={severity} sx={{ width: '100%' }}>
-        { message }
+        {message}
       </Alert>
     </Snackbar>
   )
 }
 
-const feedbackNotify = (message, severity = 'success', timeout = 4000, onClose = () => {}) => {
-  
+const feedbackNotify = (message, severity = 'success', timeout = 4000, onClose = () => { }) => {
+
   const slot = document.createElement('div')
   document.querySelector('#innerRoot').appendChild(slot)
   const outlet = createRoot(slot)
@@ -99,7 +97,7 @@ const feedbackNotify = (message, severity = 'success', timeout = 4000, onClose =
 
     outlet.unmount(slot)
     document.querySelector('#innerRoot').removeChild(slot)
-    if(onClose instanceof Function) onClose()
+    if (onClose instanceof Function) onClose()
   }
 
   outlet.render(
@@ -114,7 +112,7 @@ const feedbackNotify = (message, severity = 'success', timeout = 4000, onClose =
 
 }
 
-const Wait = ({open}) => {
+const Wait = ({ open }) => {
   return (
     <div>
       <Backdrop
@@ -128,7 +126,7 @@ const Wait = ({open}) => {
 }
 
 const feedbackWait = (show = true) => {
-  if(show) {
+  if (show) {
     const slot = document.createElement('div')
     slot.className = 'feeback-wait-slot'
     document.querySelector('#innerRoot').appendChild(slot)

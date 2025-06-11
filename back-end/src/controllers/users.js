@@ -1,3 +1,4 @@
+
 import prisma from '../database/client.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
@@ -83,6 +84,7 @@ controller.retrieveOne = async function (req, res) {
 }
 
 controller.update = async function (req, res) {
+  console.log('****', req.body, req.params.id)
   try {
     // Se existe o campo 'password' em req.body,
     // é necessário gerar o hash da senha antes
@@ -152,7 +154,6 @@ controller.login = async function (req, res) {
 
     // Usuário encontrado, vamos conferir a senha
     const passwordIsValid = await bcrypt.compare(req.body?.password, user.password)
-    //const passwordIsValid = req.body?.password === user.password
 
     // Se a senha estiver errada, retorna
     // HTTP 401: Unauthorized
@@ -172,9 +173,18 @@ controller.login = async function (req, res) {
       { expiresIn: '24h' }        // Prazo de validade do token
     )
 
+    // Formamos o cookie para enviar ao front-end
+    res.cookie(process.env.AUTH_COOKIE_NAME, token, {
+      httpOnly: true,     // Torna o cookie inacessível para JavaScript
+      secure: true,       // O cookie só trafegará em HTTPS ou localhost
+      sameSite: 'None',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000   // 24h
+    })
+
     // Retorna o token e o usuário autenticado, com o status
     // HTTP 200: OK (implícito)
-    res.send({ token, user })
+    res.send({ user })
   }
   catch (error) {
     // Se algo de errado acontecer, cairemos aqui
@@ -184,6 +194,22 @@ controller.login = async function (req, res) {
     console.error(error)
     res.status(500).end()
   }
+}
+
+controller.me = function (req, res) {
+  /*
+    Retorna o usuário autenticado (caso haja) que foi armazenado na
+    variável req.authUser pelo middleware de autorização logo após
+    o token ter sido decodificado
+  */
+  return res.send(req?.authUser)
+}
+
+controller.logout = function (req, res) {
+  // Apaga no front-end o cookie que armazena o token de autorização
+  res.clearCookie(process.env.AUTH_COOKIE_NAME)
+  // HTTP 204: No Content
+  res.status(204).end()
 }
 
 export default controller

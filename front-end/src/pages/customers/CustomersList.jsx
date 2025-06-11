@@ -11,13 +11,15 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 
+import fetchAuth from '../../lib/fetchAuth'
+
 export default function CustomersList() {
 
   const columns = [
-    { 
-      field: 'id', 
-      headerName: 'Cód.', 
-      width: 90 
+    {
+      field: 'id',
+      headerName: 'Cód.',
+      width: 90
     },
     {
       field: 'name',
@@ -29,7 +31,7 @@ export default function CustomersList() {
       headerName: 'Data Nasc.',
       width: 150,
       valueGetter: (value, row) => {
-        if(value) {
+        if (value) {
           const date = new Date(value)
           return date.toLocaleDateString('pt-BR')
         }
@@ -65,7 +67,7 @@ export default function CustomersList() {
             </IconButton>
           </Link>
 
-          <IconButton 
+          <IconButton
             aria-label="excluir"
             onClick={() => handleDeleteButtonClick(params.id)}
           >
@@ -90,10 +92,8 @@ export default function CustomersList() {
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetch(
-        import.meta.env.VITE_API_BASE + '/customers?by=name'
-      )
-      const result = await response.json()
+
+      const result = await fetchAuth.get('/customers?by=name')
 
       setState({ ...state, customers: result })
     }
@@ -107,14 +107,11 @@ export default function CustomersList() {
   }
 
   async function handleDeleteButtonClick(id) {
-    if(await feedbackConfirm('Deseja realmente excluir este item?')) {
+    if (await feedbackConfirm('Deseja realmente excluir este item?')) {
       feedbackWait(true)
       try {
         // Envia a requisição para exclusão
-        await fetch(
-          import.meta.env.VITE_API_BASE + `/customers/${id}`,
-          { method: 'DELETE' }
-        )
+        await fetchAuth.delete(`/customers/${id}`)
 
         // Atualiza os dados do datagrid
         loadData()
@@ -133,7 +130,7 @@ export default function CustomersList() {
 
   return (
     <>
-      { /* gutterBottom coloca um espaçamento extra abaixo do componente */ }
+      { /* gutterBottom coloca um espaçamento extra abaixo do componente */}
       <Typography variant="h1" gutterBottom>
         Listagem de clientes
       </Typography>
@@ -144,11 +141,11 @@ export default function CustomersList() {
         mb: 2   // Margem inferior (margin-bottom)
       }}>
         <Link to="./new">
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             size="large"
             color="secondary"
-            startIcon={ <AddCircleIcon /> }
+            startIcon={<AddCircleIcon />}
           >
             Novo cliente
           </Button>
