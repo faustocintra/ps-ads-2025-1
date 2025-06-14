@@ -13,314 +13,224 @@ import { feedbackWait, feedbackNotify, feedbackConfirm } from '../../ui/Feedback
 import { useNavigate, useParams } from 'react-router-dom'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
-
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import Car from '../../models/Cars'
 import fetchAuth from '../../lib/fetchAuth'
 
 export default function CarsForm() {
+  const colors = [ { value: 'AMARELO', label: 'AMARELO' }, { value: 'AZUL', label: 'AZUL' }, { value: 'BRANCO', label: 'BRANCO' }, { value: 'CINZA', label: 'CINZA' }, { value: 'DOURADO', label: 'DOURADO' }, { value: 'LARANJA', label: 'LARANJA' }, { value: 'MARROM', label: 'MARROM' }, { value: 'PRATA', label: 'PRATA' }, { value: 'PRETO', label: 'PRETO' }, { value: 'ROSA', label: 'ROSA' }, { value: 'ROXO', label: 'ROXO' }, { value: 'VERDE', label: 'VERDE' }, { value: 'VERMELHO', label: 'VERMELHO' } ];
+  const platesMaskFormatChars = { '9': '[0-9]', '$': '[0-9A-J]', 'A': '[A-Z]' };
+  const years = [];
+  for (let year = new Date().getFullYear(); year >= 1951; year--) years.push(year);
 
-  // Lista de cores dos carros em ordem alfabética disponíveis para o usúario escolher
-  const colors = [
-    { value: 'AMARELO', label: 'AMARELO' },
-    { value: 'AZUL', label: 'AZUL' },
-    { value: 'BRANCO', label: 'BRANCO' },
-    { value: 'CINZA', label: 'CINZA' },
-    { value: 'DOURADO', label: 'DOURADO' },
-    { value: 'LARANJA', label: 'LARANJA' },
-    { value: 'MARROM', label: 'MARROM' },
-    { value: 'PRATA', label: 'PRATA' },
-    { value: 'PRETO', label: 'PRETO' },
-    { value: 'ROSA', label: 'ROSA' },
-    { value: 'ROXO', label: 'ROXO' },
-    { value: 'VERDE', label: 'VERDE' },
-    { value: 'VERMELHO', label: 'VERMELHO' },
-  ]
-
-  // Máscara para o formato da placa do carro
-  const platesMaskFormatChars = {
-    '9': '[0-9]',    // somente dígitos
-    '$': '[0-9A-J]',  // dígito de 0 a 9 ou uma letra de A a J.
-    'A': '[A-Z]',
-  }
-
-  // Cria um vetor com os anos disponíveis, do ano atual até 1951
-  const years = [] 
-  // Date() pega a data atual. ex: 8 de novembro de 2024. O getFullYear() pega só o ano, ex: 2024
-  for (let year = new Date().getFullYear(); year >= 1951; year--) {   
-    years.push(year) // add no vetor years
-  }
-
-  /* Defini os valores padrão do formulário que são uma string vazia. selling_price e selling_date 
-  são null, porque são campos não obrigatórios. e imported é false porque é um bolleano */
-  const formDefaults = {
-    brand: '',
-    model: '',
-    color: '',
-    year_manufacture: '',
-    imported: false,
-    plates: '',
-    selling_price: '',
-    selling_date: null
-  }
+  const formDefaults = { brand: '', model: '', color: '', year_manufacture: '', imported: false, plates: '', selling_price: '', selling_date: null };
 
   const navigate = useNavigate()
   const params = useParams()
 
-  const [state, setState] = React.useState({
-    car: { ...formDefaults },
-    formModified: false
-  })
   const {
-    car,
-    formModified
-  } = state
+    control,
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: {
+      errors,
+      isDirty
+    }
+  } = useForm({
+    resolver: zodResolver(Car),
+    defaultValues: formDefaults
+  })
 
-  /*Se estivermos editando um carro, precisamos carregar seus dados assim que o componente for carregado */
   React.useEffect(() => {
-    /*Sabemos que estamos editando (e não cadastrando um novo) carro quando a rota ativa contiver um parâmetro id */
     if (params.id) loadData()
   }, [])
 
-  // Função para carregar os dados de um carro existente da API
   async function loadData() {
     feedbackWait(true)
     try {
-      const response = await fetchAuth.get('//' + params.id)
+      const response = await fetchAuth.get(`/cars/${params.id}`)
       const result = await response.json()
       
-      /*Converte o formato da data armazenado no banco de dados para o formato reconhecido pelo componente DatePicker */
       if(result.selling_date) result.selling_date = parseISO(result.selling_date)
-      setState({ ...state, car: result, formModified: false })
-    }
-    catch(error) {
+      
+      reset(result)
+
+    } catch(error) {
       console.log(error)
       feedbackNotify('ERRO: ' + error.message, 'error')
-    }
-    finally {
+    } finally {
       feedbackWait(false)
     }
   }
 
-  /* Preenche o campo do objeto car conforme o campo correspondente do formulário for modificado */
-  function handleFieldChange(event) {
-    // Tira uma cópia da variável de estado car
-    const carsCopy = { ...car }
-    // Altera em carsCopy apenas o campo da vez
-    carsCopy[event.target.name] = event.target.value
-    // Atualiza a variável de estado, substituindo o objeto car por sua cópia atualizada
-    setState({ ...state, car: carsCopy, formModified: true })
-  }
-
-  // Função para salvar os dados do formulário
-  async function handleFormSubmit(event) {
-    event.preventDefault()      // Impede o recarregamento da página
+  async function saveData(data) {
     feedbackWait(true)
     try {
-      /* Infoca o fetch para enviar os dados ao back-end.
-      Se houver parâmetro na rota, significa que estamos alterando
-      um registro existente e, portanto, o verbo precisa ser PUT */
       if(params.id) {
-        await fetchAuth.put('/cars/' + params.id, car)
-      }
-      // Senão, envia com o método POST para criar um novo registro
-      else {
-        await fetchAuth.post('/cars', car)
+        await fetchAuth.put(`/cars/${params.id}`, data)
+      } else {
+        await fetchAuth.post('/cars', data)
       }
 
-      // Exibe uma mensagem de sucesso e vai para a página de listagem dos carros
       feedbackNotify('Item salvo com sucesso.', 'success', 4000, () => {
-        // Retorna para a página de listagem
         navigate('..', { relative: 'path', replace: true })
       })
 
-    }
-    catch(error) {
+    } catch(error) {
       console.log(error)
       feedbackNotify('ERRO: ' + error.message, 'error')
-    }
-    finally {
+    } finally {
       feedbackWait(false)
     }
   }
 
-  // Função para voltar para a página anterior
   async function handleBackButtonClick() {
-    if(
-      formModified && 
-      ! await feedbackConfirm('Há informações não salvas. Deseja realmente voltar?')
-    ) return // Sai da função sem fazer nada
+    if(isDirty && !await feedbackConfirm('Há informações não salvas. Deseja realmente voltar?')) return
 
-    // Aqui o usuário respondeu que quer voltar e perder os dados
     navigate('..', { relative: 'path', 'replace': true })
   }
 
   return (
     <>
-      { /* gutterBottom coloca um espaçamento extra abaixo do componente */ }
       <Typography variant="h1" gutterBottom>
         {params.id ? `Editar veículo #${params.id}` : 'Cadastrar novo veículo'}
       </Typography>
 
+      {}
       <Box className="form-fields">
-        <form onSubmit={handleFormSubmit}>
+        <form onSubmit={handleSubmit(saveData)}>
 
-          {/* autoFocus = foco do teclado no primeiro campo */}
+          {}
           <TextField
             variant="outlined" 
-            name="brand"
             label="Marca do carro"
             fullWidth
-            required
             autoFocus
-            value={car.brand}
-            onChange={handleFieldChange}
+            required
+            {...register('brand')}
+            error={!!errors.brand}
+            helperText={errors.brand?.message}
           />
           <TextField
             variant="outlined" 
-            name="model"
             label="Modelo do carro"
             fullWidth
             required
-            value={car.model}
-            onChange={handleFieldChange}
+            {...register('model')}
+            error={!!errors.model}
+            helperText={errors.model?.message}
           />
           <TextField
             select
             variant="outlined" 
-            name="color"
             label="Cor"
             fullWidth
             required
-            value={car.color}
-            onChange={handleFieldChange}
+            defaultValue=""
+            {...register('color')}
+            error={!!errors.color}
+            helperText={errors.color?.message}
           > 
-          {/* Lista de cores para selecionar */}
-          {colors.map(s => 
-                <MenuItem key={s.value} value={s.value}>
-                  {s.label}
-                </MenuItem>
-              )}
+            {colors.map(s => <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>)}
           </TextField>
           <TextField
             select
             variant="outlined" 
-            name="year_manufacture"
             label="Ano de fabricação"
             fullWidth
             required
-            value={car.year_manufacture}
-            onChange={handleFieldChange}
+            defaultValue=""
+            {...register('year_manufacture', { valueAsNumber: true })}
+            error={!!errors.year_manufacture}
+            helperText={errors.year_manufacture?.message}
           >
-            {/* Lista de anos para selecionar */}
-            {years.map(y => 
-                <MenuItem key={y} value={y}>
-                  {y}
-                </MenuItem>
-              )}
+            {years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}
           </TextField>
 
-          {/* Checkbox para marcar se o carro é importado */}
           <div className="MuiFormControl-root">
             <FormControlLabel
               control={
-                <Checkbox
-                  name='imported'
-                  checked={car.imported}
-                  onChange={(event)=> 
-                    setState({ ...state, car: { ...car, imported: event.target.checked}, formModified: true})
-                  }
-                />
+                <Checkbox {...register('imported')} />
               }
               label='É importado?'
             />
-          </div>    
-          {/* Campo para placa do carro com a máscara*/}
-          <InputMask
-            mask='AAA-9$99'
-            value={car.plates}
-            onChange={handleFieldChange}
-            formatChars={platesMaskFormatChars}
-          >
-            { () => 
-                <TextField
-                  variant="outlined" 
-                  name="plates"
-                  label="Placa" 
-                  fullWidth
-                  required
-                />
-            }
-          </InputMask>
-          <TextField
-            variant="outlined" 
-            name="selling_price"
-            label="Preço de venda"
-            fullWidth
-            required
-            type='number'
-            value={car.selling_price}
-            onChange={handleFieldChange}
+          </div> 
+          
+          {}
+          <Controller
+            name="plates"
+            control={control}
+            render={({ field }) => (
+              <InputMask
+                mask='AAA-9$99'
+                formatChars={platesMaskFormatChars}
+                {...field}
+              >
+                {() => 
+                  <TextField
+                    variant="outlined" 
+                    label="Placa" 
+                    fullWidth
+                    required
+                    error={!!errors.plates}
+                    helperText={errors.plates?.message}
+                  />
+                }
+              </InputMask>
+            )}
           />
 
-          {/*
-            O evento onChange do componente DatePicker não passa
-            o parâmetro event, como no TextField, e sim a própria
-            data que foi modificada. Por isso, ao chamar a função
-            handleFieldChange no DatePicker, precisamos criar um
-            parâmetro event "fake" com as informações necessárias
-          */}
-          <LocalizationProvider 
-            dateAdapter={AdapterDateFns}
-            adapterLocale={ptBR}
-          >
-            <DatePicker
-              label="Data de venda"
-              value={car.selling_date || null}
-              slotProps={{
-                textField: {
-                  variant: 'outlined',
-                  fullWidth: true
-                }
-              }}
-              onChange={ date => {
-                const event = { target: { name: 'selling_date', value: date } }
-                handleFieldChange(event)
-              }}
+          <TextField
+            variant="outlined" 
+            label="Preço de venda"
+            fullWidth
+            type='number'
+            {...register('selling_price')}
+            error={!!errors.selling_price}
+            helperText={errors.selling_price?.message}
+          />
+
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+            <Controller
+              name="selling_date"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  label="Data de venda"
+                  {...field}
+                  slotProps={{
+                    textField: {
+                      variant: 'outlined',
+                      fullWidth: true,
+                      error: !!errors.selling_date,
+                      helperText: errors.selling_date?.message
+                    }
+                  }}
+                />
+              )}
             />
           </LocalizationProvider>
 
-          <Box sx={{ 
-            display: 'flex',
-            justifyContent: 'space-around',
-            width: '100%'
-          }}>
-            <Button
-              variant="contained"
-              color="secondary"
-              type="submit"
-            >
+          <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
+            <Button variant="contained" color="secondary" type="submit">
               Salvar
             </Button>
-
-            <Button
-              variant="outlined"
-              onClick={handleBackButtonClick}
-            >
+            <Button variant="outlined" onClick={handleBackButtonClick}>
               Voltar
             </Button>
           </Box>
 
-          <Box sx={{
-            fontFamily: 'monospace',
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%'
-          }}>
-            {JSON.stringify(car, null, 2)}
+          {}
+          <Box sx={{ fontFamily: 'monospace', display: 'flex', flexDirection: 'column', width: '100%', mt: 4 }}>
+            <Typography variant="h6">Form State (Debug):</Typography>
+            <pre>{JSON.stringify(watch(), null, 2)}</pre>
           </Box>
 
         </form>
       </Box>
-      
     </>
   )
 }
